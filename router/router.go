@@ -35,7 +35,7 @@ type Router struct { // initializing the router struct to hold all the routes
 	Routes      map[string]map[string]http.HandlerFunc
 	Middlewares []Middleware // storing our middlewares here (type is our Middleware function type)
 }
-
+ 
 func NewRouter() *Router {
 	// contructing the router upon the func being called
 	return &Router{

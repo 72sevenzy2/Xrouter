@@ -98,6 +98,8 @@ func (r *Router) Handle(method, path string, handler http.HandlerFunc, mws ...Mi
 
 	r.StaticRoutes[path][method] = handler // assign both static route path and method to handler
 
+
+	// keeping commented code for future reference
 	// if r.StaticRoutes[path] == nil { // checking if route endpoint itself doesnt exist before creating the path and assigning it to another map (map[string]http.HandlerFunc) which will be for the method map
 	// 	r.StaticRoutes[path] = make(map[string]http.HandlerFunc) // assign the path to the method type (GET, POST, PUT etc)
 	// }
@@ -139,6 +141,8 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 
 	}
+
+	// refactored code ^ (keeping commented code for future reference)
 
 	// method, ok := s.StaticRoutes[r.URL.Path] // search for if the url path exists
 

@@ -74,7 +74,7 @@ func NewRouter() *Router {
 }
 
 // adding routes, and assigning the method of the route aswell as the url to the handler which then is executed in the ServeHTTP func
-func (r *Router) Handle(method, path string, handler http.HandlerFunc, mws ...Middleware) {
+func (r *Router) Handle(method string, path string, handler http.HandlerFunc, mws ...Middleware) {
 
 	// applying route specific middleware in reverse order
 	for i := len(mws) - 1; i >= 0; i-- {

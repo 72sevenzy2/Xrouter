@@ -114,20 +114,46 @@ func (r *Router) Handle(method, path string, handler http.HandlerFunc, mws ...Mi
 
 // core routing logic for my router
 func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	method, ok := s.StaticRoutes[r.URL.Path] // search for if the url path exists
 
-	if !ok {
-		http.NotFound(w, r) // check if path exists on the request being sent.
-		return
+	// attempt static routes (lower time complexity compared to dynamicRoutes which requires looping over routes (O(n)))
+	if methods, ok := s.StaticRoutes[r.URL.Path]; ok { // validate if route path exists
+		if handler, ok := methods[r.Method]; ok { // also check if method for route path is appropriate
+			finalHandler := s.ApplyMiddlewares(handler) // apply middlewares if included
+			finalHandler(w, r) // run handler
+			return
+		}
+
+		// otherwise return err if method is invalid
+		helpers.Failed(w, http.StatusMethodNotAllowed, "method not allowed")
+		return 
 	}
 
-	handler, ok := method[r.Method] // assign the handler to the method type
+	// attempt dynamic routes (higher time complexity than staticRoutes (which are O(1)))
 
-	if !ok { // and check if the method of the path is valid.
-		helpers.Failed(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
-		return
+	// parts := splitPath(r.URL.Path)
+
+	for _, route := range s.DynamicRoutes {
+		if route.Method != r.Method {
+			continue // skipping the current iteration
+		}
+
+
 	}
 
-	finalHandler := s.ApplyMiddlewares(handler)
-	finalHandler(w, r)
+	// method, ok := s.StaticRoutes[r.URL.Path] // search for if the url path exists
+
+	// if !ok {
+	// 	http.NotFound(w, r) // check if path exists on the request being sent.
+	// 	return
+	// }
+
+	// handler, ok := method[r.Method] // assign the handler to the method type
+
+	// if !ok { // and check if the method of the path is valid.
+	// 	helpers.Failed(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+	// 	return
+	// }
+
+	// finalHandler := s.ApplyMiddlewares(handler)
+	// finalHandler(w, r)
 }

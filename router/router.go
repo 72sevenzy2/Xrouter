@@ -33,16 +33,16 @@ import (
 
 // Route struct to loop over dynamic routes
 type Route struct {
-	Method string
-	Parts []string
+	Method  string
+	Parts   []string
 	handler http.HandlerFunc
 }
 
 // Router struct to hold all static/dynamic routes
 type Router struct {
-	StaticRoutes     map[string]map[string]http.HandlerFunc
+	StaticRoutes  map[string]map[string]http.HandlerFunc
 	DynamicRoutes []Route
-	Middlewares []Middleware // storing our middlewares here (type is our Middleware function type)
+	Middlewares   []Middleware // storing our middlewares here (type is our Middleware function type)
 }
 
 // util functions
@@ -56,13 +56,13 @@ func isDynamic(path string) bool {
 func splitPath(path string) []string {
 	return strings.Split(strings.Trim(path, "/"), "/")
 	/*
-		Splits the route path as so:
+				Splits the route path as so:
 
-		example route: /users/42
+				example route: /users/42
 
-		strings.Trim(path, "/") splits any slashes from start to end from the route,
-		and strings.Split() splits the route from slashes ANYWHERE, so the route afterwards this block of code would look like:
- 		{"users", "42"}, as strings.Split() returns as string array
+				strings.Trim(path, "/") splits any slashes from start to end from the route,
+				and strings.Split() splits the route from slashes ANYWHERE, so the route afterwards this block of code would look like:
+		 		{"users", "42"}, as strings.Split() returns as string array
 	*/
 }
 
@@ -81,13 +81,22 @@ func (r *Router) Handle(method, path string, handler http.HandlerFunc, mws ...Mi
 		handler = mws[i](handler) // add handler to mw
 	}
 
+	// check if route is dynamic
 	if isDynamic(path) {
 		r.DynamicRoutes = append(r.DynamicRoutes, Route{
-			Method: method,
-			Parts: splitPath(path),
+			Method:  method,
+			Parts:   splitPath(path),
 			handler: handler,
 		})
+		return
 	}
+
+	// otherwise use static route logic
+	if r.StaticRoutes[path] == nil { // check if route already exists before creating
+		r.StaticRoutes[path] = make(map[string]http.HandlerFunc)
+	}
+
+	r.StaticRoutes[path][method] = handler // assign both static route path and method to handler
 
 	// if r.StaticRoutes[path] == nil { // checking if route endpoint itself doesnt exist before creating the path and assigning it to another map (map[string]http.HandlerFunc) which will be for the method map
 	// 	r.StaticRoutes[path] = make(map[string]http.HandlerFunc) // assign the path to the method type (GET, POST, PUT etc)
@@ -102,7 +111,6 @@ func (r *Router) Handle(method, path string, handler http.HandlerFunc, mws ...Mi
 	// // for example:       "/hi":
 	// //                       "GET": "and some handler here, (in this case, it will be the http handlerfunc we used)"
 }
-
 
 // core routing logic for my router
 func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -123,4 +131,3 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	finalHandler := s.ApplyMiddlewares(handler)
 	finalHandler(w, r)
 }
-

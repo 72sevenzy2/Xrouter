@@ -148,6 +148,15 @@ func (r *Router) Handle(method string, path string, handler http.HandlerFunc, mw
 	// //                       "GET": "and some handler here, (in this case, it will be the http handlerfunc we used)"
 }
 
+// grab parameters from context stored in the ServeHTTP() func
+func Param(r *http.Request, key string) string {
+	params, ok := r.Context().Value(paramsKey).(map[string]string) // type asserting it to map[string]string, and getting the whole map.
+	if !ok {
+		return ""
+	}
+	return params[key] // retrieve a particular field
+}
+
 // core routing logic for my router
 func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 

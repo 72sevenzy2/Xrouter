@@ -32,6 +32,11 @@ import (
 	"github.com/72sevenzy2/json-parser/helpers"
 )
 
+// custom type for context label (for ServeHTTP() func)
+type contextKey string
+
+const paramsKey contextKey = "params"
+
 // Route struct to loop over dynamic routes
 type Route struct {
 	Method  string
@@ -81,9 +86,9 @@ func match(routeP []string, reqP []string) (bool, map[string]string) {
 		reqp := reqP[v]
 
 		if len(rp) > 0 && rp[0] == ':' { // if includes : then its a param, and checking whether its greater than 0 prevents crashes for when if it is an empty string.
-			key := rp[1:] // removes the :
+			key := rp[1:]      // removes the :
 			params[key] = reqp //
-			continue // continue to next loop iteration
+			continue           // continue to next loop iteration
 		}
 
 		// otherwise, if not a param then reject
@@ -128,7 +133,6 @@ func (r *Router) Handle(method string, path string, handler http.HandlerFunc, mw
 
 	r.StaticRoutes[path][method] = handler // assign both static route path and method to handler
 
-
 	// keeping commented code for future reference
 	// if r.StaticRoutes[path] == nil { // checking if route endpoint itself doesnt exist before creating the path and assigning it to another map (map[string]http.HandlerFunc) which will be for the method map
 	// 	r.StaticRoutes[path] = make(map[string]http.HandlerFunc) // assign the path to the method type (GET, POST, PUT etc)
@@ -151,19 +155,19 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if methods, ok := s.StaticRoutes[r.URL.Path]; ok { // validate if route path exists
 		if handler, ok := methods[r.Method]; ok { // also check if method for route path is appropriate
 			finalHandler := s.ApplyMiddlewares(handler) // apply middlewares if included
-			finalHandler(w, r) // run handler
+			finalHandler(w, r)                          // run handler
 			return
 		}
 
 		// otherwise return err if method is invalid
 		helpers.Failed(w, http.StatusMethodNotAllowed, "method not allowed")
-		return 
+		return
 	}
 
 	// attempt dynamic routes (higher time complexity than staticRoutes (which are O(1)))
 
 	parts := splitPath(r.URL.Path)
-	
+
 	for _, route := range s.DynamicRoutes {
 		if route.Method != r.Method {
 			continue // skipping the current iteration
@@ -174,13 +178,9 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			continue // skip current iteration
 		}
 
-		// custom type for context label
-		type contextKey string
-		const paramsKey contextKey = "params"
-
 		// apply and execute with context
 		ctx := context.WithValue(r.Context(), paramsKey, params)
-		final := s.ApplyMiddlewares(route.Handler) 
+		final := s.ApplyMiddlewares(route.Handler)
 		final(w, r.WithContext(ctx))
 		return
 	}

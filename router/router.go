@@ -66,6 +66,34 @@ func splitPath(path string) []string {
 	*/
 }
 
+// func to match request parts and route parts
+func match(routeP []string, reqP []string) (bool, map[string]string) {
+	// check if lengths match (if it isnt then it cannot be compared)
+	if len(routeP) != len(reqP) {
+		return false, nil
+	}
+
+	params := make(map[string]string) // return value
+
+	for v := range routeP {
+		rp := routeP[v]
+		reqp := reqP[v]
+
+		if len(rp) > 0 && rp[0] == ':' { // if includes : then its a param
+			key := rp[1:] 
+			params[key] = reqp
+			continue // continue to next loop iteration
+		}
+
+		if rp != reqp {
+			return false, nil
+		}
+	}
+
+	// everything matched
+	return true, params
+}
+
 func NewRouter() *Router {
 	// contructing the router upon the func being called
 	return &Router{

@@ -25,6 +25,7 @@ SOFTWARE.
 package router
 
 import (
+	"context"
 	"net/http"
 	"strings"
 
@@ -75,16 +76,17 @@ func match(routeP []string, reqP []string) (bool, map[string]string) {
 
 	params := make(map[string]string) // return value
 
-	for v := range routeP {
+	for v := range routeP { // can use both reqP and routeP to loop over
 		rp := routeP[v]
 		reqp := reqP[v]
 
-		if len(rp) > 0 && rp[0] == ':' { // if includes : then its a param
-			key := rp[1:] 
-			params[key] = reqp
+		if len(rp) > 0 && rp[0] == ':' { // if includes : then its a param, and checking whether its greater than 0 prevents crashes for when if it is an empty string.
+			key := rp[1:] // removes the :
+			params[key] = reqp //
 			continue // continue to next loop iteration
 		}
 
+		// otherwise, if not a param then reject
 		if rp != reqp {
 			return false, nil
 		}
@@ -160,15 +162,30 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// attempt dynamic routes (higher time complexity than staticRoutes (which are O(1)))
 
-	// parts := splitPath(r.URL.Path)
-
+	parts := splitPath(r.URL.Path)
+	
 	for _, route := range s.DynamicRoutes {
 		if route.Method != r.Method {
 			continue // skipping the current iteration
 		}
 
+		ok, params := match(route.Parts, parts)
+		if !ok {
+			continue // skip current iteration
+		}
 
+		// custom type for context label
+		type contextKey string
+		const paramsKey contextKey = "params"
+
+		// apply and execute with context
+		ctx := context.WithValue(r.Context(), paramsKey, params)
+		final := s.ApplyMiddlewares(route.handler) 
+		final(w, r.WithContext(ctx))
+		return
 	}
+
+	helpers.Failed(w, http.StatusNotFound, "Page not found.")
 
 	// refactored code ^ (keeping commented code for future reference)
 

@@ -36,7 +36,7 @@ import (
 type Route struct {
 	Method  string
 	Parts   []string
-	handler http.HandlerFunc
+	Handler http.HandlerFunc
 }
 
 // Router struct to hold all static/dynamic routes
@@ -116,7 +116,7 @@ func (r *Router) Handle(method string, path string, handler http.HandlerFunc, mw
 		r.DynamicRoutes = append(r.DynamicRoutes, Route{
 			Method:  method,
 			Parts:   splitPath(path),
-			handler: handler,
+			Handler: handler,
 		})
 		return
 	}
@@ -180,7 +180,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		// apply and execute with context
 		ctx := context.WithValue(r.Context(), paramsKey, params)
-		final := s.ApplyMiddlewares(route.handler) 
+		final := s.ApplyMiddlewares(route.Handler) 
 		final(w, r.WithContext(ctx))
 		return
 	}

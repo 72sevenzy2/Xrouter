@@ -148,7 +148,7 @@ func (r *Router) Handle(method string, path string, handler http.HandlerFunc, mw
 	// //                       "GET": "and some handler here, (in this case, it will be the http handlerfunc we used)"
 }
 
-// grab parameters from context stored in the ServeHTTP() func
+// Grab parameters stored in context. Pass in an http.Request, and key (string) to be retrieved.
 func Param(r *http.Request, key string) string {
 	params, ok := r.Context().Value(paramsKey).(map[string]string) // type asserting it to map[string]string, and getting the whole map.
 	if !ok {

@@ -1,9 +1,5 @@
 # An http router built from scratch, built ontop of the go stdlib (net/http).
 
-# context:
-
-A router built ontop for managing http routes likewise some of the bigger http routers like the chi/gin router.
-
 # key features:
 
 - Includes middleware(s) > basicAuth (with username and password), BearerAuth (with a bearer token), logging middleware, a timeout middleware (to cut off slow requests), and a recoverer middleware to prevent server crashes.

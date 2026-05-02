@@ -2,6 +2,7 @@
 
 # key features:
 
+- json responses towards clients using a tool I made (json-parser).
 - Includes middleware(s) > basicAuth (with username and password), BearerAuth (with a bearer token), logging middleware, a timeout middleware (to cut off slow requests), and a recoverer middleware to prevent server crashes.
 - Route specific middleware(s) > supports middlewares for specific routes without applying globally to all the routes.
 - Supports route parameters > routes can have dynamic parameters for example, "/:id", although this feature can be slower than http routers like chi/gin as the implementation involves looping over routes to check if its dynamic (O(n)). But for non-dynamic routes (without parameters), this router uses a simple map to store all routes without looping over them which is faster (O(1)).

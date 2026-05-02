@@ -2,6 +2,7 @@
 
 # key features:
 
+- no external dependencies used, other than json-parser which i made.
 - json responses towards clients using a tool I made (json-parser).
 - Includes middleware(s) > basicAuth (with username and password), BearerAuth (with a bearer token), logging middleware, a timeout middleware (to cut off slow requests), and a recoverer middleware to prevent server crashes.
 - Route specific middleware(s) > supports middlewares for specific routes without applying globally to all the routes.

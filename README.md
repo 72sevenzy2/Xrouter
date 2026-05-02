@@ -1,13 +1,44 @@
 # An http router built from scratch, built ontop of the go stdlib (net/http).
 
-# Features / context
+# context:
 
-- This router is built ontop the golang stdlib for managing http routes (http.handlerFunc).
-- works likewise some of the bigger http routers such as chi/mux, you handle routes with this router using the "r.Handle(...)" func which you then pass in the necessary parameters (eg: path, path method, middleware, and the the actual handler needed to run the logic for that endpoint.)
-- also supports route-specific middleware, by passing your desired middleware to the "r.Handle()" func as the 4th parameters, its important that i note you can add more than one middleware, but if you dont need route-specific middlewares, you can apply global middlewares, an example usage will be shown below.
-- also includes middlewares, such as basicAuth, recoverer mw, logger mw, a bearerAuth mw, and a timeout middleware, example usages for all will be shown below.
+A router built ontop for managing http routes likewise some of the bigger http routers like the chi/gin router.
 
-# Example usage:
+# key features:
+
+- Includes middleware(s) > basicAuth (with username and password), BearerAuth (with a bearer token), logging middleware, a timeout middleware (to cut off slow requests), and a recoverer middleware to prevent server crashes.
+- Route specific middleware(s) > supports middlewares for specific routes without applying globally to all the routes.
+- Supports route parameters > routes can have dynamic parameters for example, "/:id", although this feature can be slower than http routers like chi/gin as the implementation involves looping over routes to check if its dynamic (O(n)). But for non-dynamic routes (without parameters), this router uses a simple map to store all routes without looping over them which is faster (O(1)).
+
+Its also important to note that when handling dynamic routes, the route parameters are stored in context in a map, so you can retrieve a particular field in that map via the Param() func. An example will be shown below:
+
+```
+ package main
+
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/72sevenzy2/http-router/internal/router"
+)
+
+func main() {
+	r := router.NewRouter()
+
+	r.Handle(http.MethodGet, "/user/:64", func(w http.ResponseWriter, r *http.Request) {
+		HandleThisFunc()...
+		param := router.Param(w, "user") // returns "64"
+	})
+
+	fmt.Println("server running on port 8080")
+	if err := http.ListenAndServe(":8080", r); err != nil {
+		panic(err)
+	}
+}
+
+```
+
+# General usage:
 
 ```
  package main
@@ -69,6 +100,7 @@ func main() {
 }
 
 ```
+^ it is also important to note that you can limit how much the logging middleware reads from the request body, the default is 1 kilobyte as of now, but you can change it via passing in a SetBody() func as the parameter in the Logger() func, an example would be: "r.Use(router.Logger(SetBody(1024 * 2)))" (limit to 2 kilobytes.) but make sure the size your going to configure is of appropriate type (int64).
 
 Example usage with route-specific middleware:
 

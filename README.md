@@ -24,7 +24,10 @@ func main() {
 
 	r.Handle(http.MethodGet, "/user/:64", func(w http.ResponseWriter, r *http.Request) {
 		HandleThisFunc()...
-		param := router.Param(w, "user") // returns "64"
+		param, ok := router.Param(w, "user") // returns "64"
+		if !ok {
+			handleErr()
+		}
 	})
 
 	fmt.Println("server running on port 8080")

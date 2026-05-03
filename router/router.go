@@ -98,12 +98,12 @@ func (r *Router) Handle(method string, path string, handler http.HandlerFunc, mw
 }
 
 // Grab parameters stored in context. Pass in an http.Request, and key (string) to be retrieved.
-func Param(r *http.Request, key string) string {
+func Param(r *http.Request, key string) (string, bool) {
 	params, ok := r.Context().Value(paramsKey).(map[string]string) // type asserting it to map[string]string, and getting the whole map.
 	if !ok {
-		return ""
+		return "", false
 	}
-	return params[key] // retrieve a particular field
+	return params[key], true // retrieve a particular field
 }
 
 // core routing logic for my router

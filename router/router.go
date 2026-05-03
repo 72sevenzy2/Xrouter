@@ -27,6 +27,7 @@ package router
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/72sevenzy2/json-parser/helpers"
 )
@@ -108,6 +109,12 @@ func Param(r *http.Request, key string) (string, bool) {
 
 // core routing logic for my router
 func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// making all routes normalised without a / at the end, but with root /.
+	// for example. Input: "/users//" output: "/users", input: "users/1" output: "/users/1"
+	path := strings.TrimRight(r.URL.Path, "/");
+	if path == "" {
+		path = "/" 
+	}
 
 	// attempt static routes (lower time complexity compared to dynamicRoutes which requires looping over routes (O(n)))
 	if methods, ok := s.StaticRoutes[r.URL.Path]; ok { // validate if route path exists

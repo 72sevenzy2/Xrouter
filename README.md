@@ -1,4 +1,4 @@
-<h1 align="center">Xrouter</h1>
+<h1 align="center">Xrouter.</h1>
 An http router built from scratch, built ontop of the go stdlib (net/http).
 
 # key features:

@@ -66,7 +66,6 @@ func main() {
 
 ```
 <h3 align="center">That of course is a example with no middlewares attached yet.</h3>
-<br>
 <h2 align="center" style.Background="gray">Example usage with all the middlewares:</h2>
 
 ```

@@ -39,7 +39,7 @@ func main() {
 
 ```
 <br>
-<h2 align="center">General usage:</h2>
+<h1 align="center">General usage:</h1>
 
 ```
  package main

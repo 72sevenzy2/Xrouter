@@ -39,7 +39,7 @@ func main() {
 
 ```
 
-# General usage:
+<h3 align="center">General usage:</h3>
 
 ```
  package main
@@ -65,9 +65,9 @@ func main() {
 }
 
 ```
-> That of course is a example with no middlewares attached yet.
+<p align="center"> > That of course is a example with no middlewares attached yet.</p>
 
-Example usage with all the middlewares:
+<p align="center">Example usage with all the middlewares:</p>
 
 ```
 
@@ -103,7 +103,7 @@ func main() {
 ```
 ^ it is also important to note that you can limit how much the logging middleware reads from the request body, the default is 1 kilobyte as of now, but you can change it via passing in a SetBody() func as the parameter in the Logger() func, an example would be: "r.Use(router.Logger(SetBody(1024 * 2)))" (limit to 2 kilobytes.) but make sure the size your going to configure is of appropriate type (int64).
 
-Example usage with route-specific middleware:
+<p align="center">Example usage with route-specific middleware:</p>
 
 ```
 package main

@@ -25,7 +25,7 @@ func main() {
 
 	r.Handle(http.MethodGet, "/user/:64", func(w http.ResponseWriter, r *http.Request) {
 		HandleThisFunc()...
-		param, ok := router.Param(w, "user") // returns "64"
+		param, ok := router.Param(w, "user") 
 		if !ok {
 			handleErr()
 		}

@@ -23,7 +23,7 @@ type responseWriter struct {
 
 // override WriteHeader func()
 func (rw *responseWriter) WriteHeader(code int) {
-	rw.status = code; // saving status code in struct
+	rw.status = code // saving status code in struct
 	rw.ResponseWriter.WriteHeader(code)
 }
 
@@ -34,19 +34,12 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 	return v, err
 }
 
-// functional param pattern to work with optional parameters for setting default body sizes/custom body sizes that are to be logged.
+// plain structs to work with default values.
 type bodySize struct {
 	size uint32
 }
-type LoggerConf func(*bodySize)
 
-func SetBody(size uint32) LoggerConf {
-	return func(bs *bodySize) {
-		bs.size = size
-	}
-}
-
-func Logger(confSize LoggerConf) Middleware { // returns the middleware type (which takes in a handler and returns a new one)
+func Logger(confSize uint32) Middleware { // returns the middleware type (which takes in a handler and returns a new one)
 	return func(hf http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now() // setting the current time (before the request has ended)
@@ -54,13 +47,16 @@ func Logger(confSize LoggerConf) Middleware { // returns the middleware type (wh
 
 			var buf bytes.Buffer // a buffer which will hold the r.Body
 
-			// setting default value for request body size
+			// setting default value first for request body size
 			opt := &bodySize{
 				size: 1024,
 			}
-
-			if confSize != nil {
-				confSize(opt)
+			
+			// apply custom size
+			if confSize != 0 {
+				opt = &bodySize{
+					size: confSize,
+				}
 			}
 
 			r.Body = io.NopCloser(io.TeeReader(r.Body, &buf)) // using io.NopCloser as io.TeeReader does not implement io.ReadCloser.
@@ -68,7 +64,7 @@ func Logger(confSize LoggerConf) Middleware { // returns the middleware type (wh
 
 			rw := &responseWriter{ // default status code and custom response writer initialisation
 				ResponseWriter: w,
-				status: http.StatusOK,
+				status:         http.StatusOK,
 			}
 
 			hf(rw, r) // calling the next function to continue to the next handler

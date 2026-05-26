@@ -36,11 +36,11 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 
 // functional param pattern to work with optional parameters for setting default body sizes/custom body sizes that are to be logged.
 type bodySize struct {
-	size int64
+	size uint32
 }
 type LoggerConf func(*bodySize)
 
-func SetBody(size int64) LoggerConf {
+func SetBody(size uint32) LoggerConf {
 	return func(bs *bodySize) {
 		bs.size = size
 	}
@@ -76,7 +76,7 @@ func Logger(confSize LoggerConf) Middleware { // returns the middleware type (wh
 
 			// compressing body if over 1 kb
 			body := buf.String()
-			if int64(len(body)) > opt.size {
+			if uint32(len(body)) > opt.size {
 				body = body[:opt.size] + "...(truncated)"
 			}
 

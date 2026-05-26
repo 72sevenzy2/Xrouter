@@ -47,15 +47,15 @@ var buff = sync.Pool{
 	},
 }
 
-func Logger(confSize uint32) Middleware { // returns the middleware type (which takes in a handler and returns a new one)
+func Logger(confSize uint32) Middleware { // returns the middleware type
 	return func(hf http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now() // setting the current time (before the request has ended)
 			fmt.Printf("Request has started with URL: %s, and method: %s, and in time: %s\n", r.URL, r.Method, start)
 
 			buf := buff.Get().(*bytes.Buffer) // reusable buffer.
-			buf.Reset() // reset buffer before use.
-			defer buff.Put(buf) // add buf to the buffer pool
+			buf.Reset()                       // reset buffer before use.
+			defer buff.Put(buf)               // add buf to the buffer pool
 
 			// setting default value first for request body size
 			opt := bodySize{
@@ -69,16 +69,20 @@ func Logger(confSize uint32) Middleware { // returns the middleware type (which 
 				}
 			}
 
+			// limit size
+			lm := &LimitedBuffer{
+				buf:   buf,
+				limit: opt.size + 1,
+			}
 
-
-			r.Body = io.NopCloser(io.TeeReader(r.Body, buf)) // using io.NopCloser as io.TeeReader does not implement io.ReadCloser.
-			// io.TeeReader allows the current handler to read the request body data, whilst also allowing copying.4
+			r.Body = io.NopCloser(io.TeeReader(r.Body, lm)) // using io.NopCloser as io.TeeReader does not implement io.ReadCloser.
+			// io.TeeReader allows the current handler to read the request body data, whilst also allowing copying.
 
 			rw := &responseWriter{ // default status code and custom response writer initialisation
 				ResponseWriter: w,
 				status:         http.StatusOK,
 			}
-			
+
 			hf(rw, r) // calling the next function to continue to the next handler
 			// by calling hf() before printing, we give time to the io Readers above to read the request body data.
 

@@ -87,16 +87,17 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 			// by calling hf() before printing, we give time to the io Readers above to read the request body data.
 
 			// compressing body if over 1 kb
-			body := buf.String()
+			body := buf.Bytes()
 			if uint32(len(body)) > opt.size {
-				body = body[:opt.size] + "...(truncated)"
+				body = body[:opt.size]; // truncated
+				fmt.Println("body has been truncated.")
 			}
 
 			endTime := time.Since(start) // after the request has ended, in which we will print below
-			fmt.Printf("Request has ended: %s, with status code %d ||| and with response body size (in bytes): %d", endTime, rw.status, rw.size)
+			fmt.Printf("request has ended: %s, with status code %d ||| and with response body size (in bytes): %d", endTime, rw.status, rw.size)
 
 			fmt.Println("request body data: (with data size of:)", opt.size)
-			fmt.Println(body)
+			fmt.Println(string(body))
 
 			// redacting sensitive header before printing
 			header := r.Header.Clone()

@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/72sevenzy2/json-parser/helpers"
@@ -39,19 +40,28 @@ type bodySize struct {
 	size uint32
 }
 
+// object pooling for request body logs
+var buff = sync.Pool{
+	New: func() any {
+		return new(bytes.Buffer)
+	},
+}
+
 func Logger(confSize uint32) Middleware { // returns the middleware type (which takes in a handler and returns a new one)
 	return func(hf http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now() // setting the current time (before the request has ended)
 			fmt.Printf("Request has started with URL: %s, and method: %s, and in time: %s\n", r.URL, r.Method, start)
 
-			var buf bytes.Buffer // a buffer which will hold the r.Body
+			buf := buff.Get().(*bytes.Buffer) // reusable buffer.
+			buf.Reset() // reset buffer before use.
+			defer buff.Put(buf) // add buf to the buffer pool
 
 			// setting default value first for request body size
 			opt := &bodySize{
 				size: 1024,
 			}
-			
+
 			// apply custom size
 			if confSize != 0 {
 				opt = &bodySize{
@@ -59,14 +69,14 @@ func Logger(confSize uint32) Middleware { // returns the middleware type (which 
 				}
 			}
 
-			r.Body = io.NopCloser(io.TeeReader(r.Body, &buf)) // using io.NopCloser as io.TeeReader does not implement io.ReadCloser.
+			r.Body = io.NopCloser(io.TeeReader(r.Body, buf)) // using io.NopCloser as io.TeeReader does not implement io.ReadCloser.
 			// io.TeeReader allows the current handler to read the request body data, whilst also allowing copying.4
 
 			rw := &responseWriter{ // default status code and custom response writer initialisation
 				ResponseWriter: w,
 				status:         http.StatusOK,
 			}
-
+			
 			hf(rw, r) // calling the next function to continue to the next handler
 			// by calling hf() before printing, we give time to the io Readers above to read the request body data.
 

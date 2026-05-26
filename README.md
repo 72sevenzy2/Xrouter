@@ -1,4 +1,5 @@
-# An http router built from scratch, built ontop of the go stdlib (net/http).
+<h1 align="center">Xrouter.</h1>
+<h2 align="center">An http router built from scratch, ontop of the go stdlib (net/http).</h2>
 
 # key features:
 
@@ -24,7 +25,7 @@ func main() {
 
 	r.Handle(http.MethodGet, "/user/:64", func(w http.ResponseWriter, r *http.Request) {
 		HandleThisFunc()...
-		param, ok := router.Param(w, "user") // returns "64"
+		param, ok := router.Param(w, "user") 
 		if !ok {
 			handleErr()
 		}
@@ -37,8 +38,8 @@ func main() {
 }
 
 ```
-
-# General usage:
+<br>
+<h1 align="center">General usage:</h1>
 
 ```
  package main
@@ -64,9 +65,8 @@ func main() {
 }
 
 ```
-> That of course is a example with no middlewares attached yet.
-
-Example usage with all the middlewares:
+<h3 align="center">That of course is a example with no middlewares attached yet.</h3>
+<h2 align="center" style.Background="gray">Example usage with all the middlewares:</h2>
 
 ```
 
@@ -101,8 +101,9 @@ func main() {
 
 ```
 ^ it is also important to note that you can limit how much the logging middleware reads from the request body, the default is 1 kilobyte as of now, but you can change it via passing in a SetBody() func as the parameter in the Logger() func, an example would be: "r.Use(router.Logger(SetBody(1024 * 2)))" (limit to 2 kilobytes.) but make sure the size your going to configure is of appropriate type (int64).
-
-Example usage with route-specific middleware:
+<br>
+<br>
+<h2 align="center">Example usage with route-specific middleware:</h2>
 
 ```
 package main

@@ -58,16 +58,18 @@ func Logger(confSize uint32) Middleware { // returns the middleware type (which 
 			defer buff.Put(buf) // add buf to the buffer pool
 
 			// setting default value first for request body size
-			opt := &bodySize{
-				size: 1024,
+			opt := bodySize{
+				size: 1024, // 1kb
 			}
 
 			// apply custom size
 			if confSize != 0 {
-				opt = &bodySize{
+				opt = bodySize{
 					size: confSize,
 				}
 			}
+
+
 
 			r.Body = io.NopCloser(io.TeeReader(r.Body, buf)) // using io.NopCloser as io.TeeReader does not implement io.ReadCloser.
 			// io.TeeReader allows the current handler to read the request body data, whilst also allowing copying.4

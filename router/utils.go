@@ -54,7 +54,6 @@ func match(routeP []string, reqP []string) (bool, map[string]string) {
 }
 
 // custom limited writer function for Logger() to limit body size reading.
-
 type LimitedBuffer struct {
 	buf   *bytes.Buffer
 	limit uint32

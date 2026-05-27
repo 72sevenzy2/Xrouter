@@ -74,7 +74,7 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 				buf:   buf,
 				limit: opt.size + 1,
 			}
-			
+
 			r.Body = io.NopCloser(io.TeeReader(r.Body, lm)) // using io.NopCloser as io.TeeReader does not implement io.ReadCloser.
 			// io.TeeReader allows the current handler to read the request body data, whilst also allowing copying.
 
@@ -113,6 +113,11 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 func BearerAuth(AuthKey string) Middleware {
 	return func(hf http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
+			if len([]byte(AuthKey)) == 1 { // check if authkey has more than 1 character (converting to []byte gives a string each char 1 byte.)
+				helpers.Failed(w, http.StatusInternalServerError, "please include a stronger AuthKey.")
+				return
+			}
+
 			authLab := r.Header.Get("Authorization") // grabbing the token
 
 			token := strings.TrimPrefix(authLab, "Bearer ") // removing the "bearer " part of the token to then compare it to the authkey
@@ -136,7 +141,7 @@ func BasicAuth(user, password string) Middleware { // implements the middleware 
 			authUser, authPassword, ok := r.BasicAuth() // extracting the user and password and if it exists (ok) from the r.BasicAuth() func, which is a built in method in go to do so, instead of manually parsing it ourselves.
 
 			if !ok || authUser != user || authPassword != password { // run the necessary logic
-				helpers.Failed(w, http.StatusForbidden, http.StatusText(http.StatusForbidden))
+				helpers.Failed(w, http.StatusForbidden, "invalid credentials.")
 				return
 			}
 

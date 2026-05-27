@@ -74,7 +74,7 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 				buf:   buf,
 				limit: opt.size + 1,
 			}
-
+			
 			r.Body = io.NopCloser(io.TeeReader(r.Body, lm)) // using io.NopCloser as io.TeeReader does not implement io.ReadCloser.
 			// io.TeeReader allows the current handler to read the request body data, whilst also allowing copying.
 

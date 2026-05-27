@@ -14,7 +14,7 @@ func HiHandler() http.HandlerFunc {
 
 		err := json.NewDecoder(r.Body).Decode(&i) // decoding the body to get the data we want
 		if err != nil {                           // if there is no data which we needed in the body, throw an json error msg
-			helpers.Failed(w, http.StatusBadRequest, err.Error())
+			helpers.Failed(w, http.StatusBadRequest, err)
 			return
 		}
 		// respond with json returning the users user and the users id

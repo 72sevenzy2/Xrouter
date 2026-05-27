@@ -3,6 +3,7 @@ package router
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -114,7 +115,7 @@ func BearerAuth(AuthKey string) Middleware {
 	return func(hf http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			if len([]byte(AuthKey)) == 1 { // check if authkey has more than 1 character (converting to []byte gives a string each char 1 byte.)
-				helpers.Failed(w, http.StatusInternalServerError, "please include a stronger AuthKey.")
+				helpers.Failed(w, http.StatusInternalServerError, errors.New("please include a stronger AuthKey."))
 				return
 			}
 
@@ -123,7 +124,7 @@ func BearerAuth(AuthKey string) Middleware {
 			token := strings.TrimPrefix(authLab, "Bearer ") // removing the "bearer " part of the token to then compare it to the authkey
 
 			if token == authLab || token != AuthKey { // check if the authkey is matching
-				helpers.Failed(w, http.StatusForbidden, "Invalid Token") // if not then throw a failed json response
+				helpers.Failed(w, http.StatusForbidden, errors.New("Invalid Token")) // if not then throw a failed json response
 				return                                                   // exit the request
 			}
 
@@ -141,7 +142,7 @@ func BasicAuth(user, password string) Middleware { // implements the middleware 
 			authUser, authPassword, ok := r.BasicAuth() // extracting the user and password and if it exists (ok) from the r.BasicAuth() func, which is a built in method in go to do so, instead of manually parsing it ourselves.
 
 			if !ok || authUser != user || authPassword != password { // run the necessary logic
-				helpers.Failed(w, http.StatusForbidden, "invalid credentials.")
+				helpers.Failed(w, http.StatusForbidden, errors.New("invalid credentials."))
 				return
 			}
 
@@ -172,7 +173,7 @@ func Recoverer() Middleware {
 			defer func() { // catches any crashses and recovers the request, while printing the err in return.
 				if err := recover(); err != nil {
 					fmt.Println("caught: ", err)
-					helpers.Failed(w, http.StatusInternalServerError, fmt.Sprintf("server error: %s", err))
+					helpers.Failed(w, http.StatusInternalServerError, fmt.Errorf("server error: %s", err))
 				}
 			}()
 
@@ -181,6 +182,8 @@ func Recoverer() Middleware {
 	}
 
 }
+
+// middleware chaining.
 
 // func to apply the middlewares
 func (r *Router) ApplyMiddlewares(h http.HandlerFunc) http.HandlerFunc {

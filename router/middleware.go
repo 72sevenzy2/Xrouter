@@ -114,7 +114,7 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 func BearerAuth(AuthKey string) Middleware {
 	return func(hf http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			if len([]byte(AuthKey)) == 1 { // check if authkey has more than 1 character (converting to []byte gives a string each char 1 byte.)
+			if len(AuthKey) <= 1 { // check if authkey has less than 2 character
 				helpers.Failed(w, http.StatusInternalServerError, errors.New("please include a stronger AuthKey."))
 				return
 			}

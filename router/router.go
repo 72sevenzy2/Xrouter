@@ -118,7 +118,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// attempt dynamic routes (higher time complexity than staticRoutes (which are O(1)))
 
-	parts := splitPath(r.URL.Path)
+	parts := splitPath(r.URL.Path)	
 
 	for _, route := range s.DynamicRoutes {
 		if route.Method != r.Method {

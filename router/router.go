@@ -48,7 +48,7 @@ type Route struct {
 // Router struct to hold all static/dynamic routes
 type Router struct {
 	StaticRoutes  map[string]map[string]http.HandlerFunc
-	DynamicRoutes []Route
+	DynamicRoutes map[string][]Route  // split dynamic routes by methods to reduce lookup time
 	Middlewares   []Middleware // storing our middlewares here (type is our Middleware function type)
 }
 
@@ -69,7 +69,7 @@ func (r *Router) Handle(method string, path string, handler http.HandlerFunc, mw
 
 	// check if route is dynamic
 	if isDynamic(path) {
-		r.DynamicRoutes = append(r.DynamicRoutes, Route{
+		r.DynamicRoutes[method] = append(r.DynamicRoutes[method], Route{
 			Method:  method,
 			Parts:   splitPath(path),
 			Handler: handler,
@@ -120,10 +120,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	parts := splitPath(r.URL.Path)	
 
-	for _, route := range s.DynamicRoutes {
-		if route.Method != r.Method {
-			continue // skipping the current iteration
-		}
+	for _, route := range s.DynamicRoutes[r.Method] { // loop over dynamic routes which are grouped by methods
 
 		ok, params := match(route.Parts, parts)
 		if !ok {

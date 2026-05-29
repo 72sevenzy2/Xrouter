@@ -14,7 +14,7 @@ import (
 	"github.com/72sevenzy2/json-parser/helpers"
 )
 
-type Middleware func(http.HandlerFunc) http.HandlerFunc // the middleware type (takes in the current handler and returns a new one)
+type Middleware func(HandlerFunc) HandlerFunc // the middleware type (takes in the current handler and returns a new one)
 
 // custom responseWriter type to capture status code and request byte size.
 type responseWriter struct {
@@ -49,8 +49,8 @@ var buff = sync.Pool{
 }
 
 func Logger(confSize uint32) Middleware { // returns the middleware type
-	return func(hf http.HandlerFunc) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
+	return func(hf HandlerFunc) HandlerFunc {
+		return func(w http.ResponseWriter, r *Request) {
 			start := time.Now() // setting the current time (before the request has ended)
 			fmt.Printf("Request has started with URL: %s, and method: %s, and in time: %s\n", r.URL, r.Method, start)
 
@@ -112,8 +112,8 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 // bearer auth middleware (this includes having a bearer token which will then be compared to the authkey )
 
 func BearerAuth(AuthKey string) Middleware {
-	return func(hf http.HandlerFunc) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
+	return func(hf HandlerFunc) HandlerFunc {
+		return func(w http.ResponseWriter, r *Request) {
 			if len(AuthKey) <= 1 { // check if authkey has less than 2 character
 				helpers.Failed(w, http.StatusInternalServerError, errors.New("please include a stronger AuthKey."))
 				return
@@ -136,8 +136,8 @@ func BearerAuth(AuthKey string) Middleware {
 // basic auth middleware (this auth includes having a user and password inorder to access the endpoint)
 
 func BasicAuth(user, password string) Middleware { // implements the middleware type which returns a handler
-	return func(hf http.HandlerFunc) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
+	return func(hf HandlerFunc) HandlerFunc {
+		return func(w http.ResponseWriter, r *Request) {
 
 			authUser, authPassword, ok := r.BasicAuth() // extracting the user and password and if it exists (ok) from the r.BasicAuth() func, which is a built in method in go to do so, instead of manually parsing it ourselves.
 
@@ -154,13 +154,15 @@ func BasicAuth(user, password string) Middleware { // implements the middleware 
 // timeout middleware
 
 func Timeout(seconds int) Middleware {
-	return func(hf http.HandlerFunc) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
+	return func(hf HandlerFunc) HandlerFunc {
+		return func(w http.ResponseWriter, r *Request) {
 			ctx, cancel := context.WithTimeout(r.Context(), time.Duration(seconds)*time.Second) // initialising timeout (in seconds)
 
 			defer cancel() // cancelling at the end of the func (current handler)
 
-			hf(w, r.WithContext(ctx)) // ServeHTTP(w, and "r" with the context 'ctx')
+			hf(w, &Request{
+				contextReq: r.WithContext(ctx), // pass in with request context (creates shallow copy of the original request and runs it with context)
+			}) // ServeHTTP(w, and "r" with the context 'ctx')
 		}
 	}
 }
@@ -168,8 +170,8 @@ func Timeout(seconds int) Middleware {
 // recoverer middleware (for preventing server crashes)
 
 func Recoverer() Middleware {
-	return func(hf http.HandlerFunc) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
+	return func(hf HandlerFunc) HandlerFunc {
+		return func(w http.ResponseWriter, r *Request) {
 			defer func() { // catches any crashses and recovers the request, while printing the err in return.
 				if err := recover(); err != nil {
 					fmt.Println("caught: ", err)
@@ -186,7 +188,7 @@ func Recoverer() Middleware {
 // middleware chaining.
 
 // func to apply the middlewares
-func (r *Router) ApplyMiddlewares(h http.HandlerFunc) http.HandlerFunc {
+func (r *Router) ApplyMiddlewares(h HandlerFunc) HandlerFunc {
 	for i := len(r.Middlewares) - 1; i >= 0; i-- {
 		h = r.Middlewares[i](h)
 	}

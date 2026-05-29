@@ -59,7 +59,8 @@ type LimitedBuffer struct {
 	limit uint32
 }
 
-func (l *LimitedBuffer) Write(p []byte) (int, error) { // write func
+// custom write func for LimitedBuffer, (allocates new slice based on truncated size on original slice)
+func (l *LimitedBuffer) Write(p []byte) (int, error) {
 	remaining := l.limit - uint32(l.buf.Len())
 
 	if remaining <= 0 {

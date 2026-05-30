@@ -8,7 +8,7 @@
 - Route specific middleware(s) > supports middlewares for specific routes without applying globally to all the routes.
 - Supports route parameters > routes can have dynamic parameters for example, "/:id", although this feature can be slower than http routers like chi/gin as the implementation involves looping over routes to check if its dynamic (O(n)). But for non-dynamic routes (without parameters), this router uses a simple map to store all routes without looping over them which is faster (O(1)).
 
-Its also important to note that when handling dynamic routes, the route parameters are stored in context in a map, so you can retrieve a particular field in that map via the Param() func. An example will be shown below:
+Its also important to note that when handling dynamic routes, the route parameters are stored in a custom Request struct map field (params) in a map, so you can retrieve a particular field in that map via r.params, An example will be shown below:
 
 ```
  package main
@@ -23,9 +23,9 @@ import (
 func main() {
 	r := router.NewRouter()
 
-	r.Handle(http.MethodGet, "/user/:64", func(w http.ResponseWriter, r *http.Request) {
+	r.Handle(http.MethodGet, "/user/:64", func(w http.ResponseWriter, r *router.Request) {
 		HandleThisFunc()...
-		param, ok := router.Param(w, "user") 
+		param, ok := r.params["user"]
 		if !ok {
 			handleErr()
 		}
@@ -54,7 +54,7 @@ import (
 func main() {
 	r := router.NewRouter()
 
-	r.Handle(http.MethodGet, "/resp", func(w http.ResponseWriter, r *http.Request) {
+	r.Handle(http.MethodGet, "/resp", func(w http.ResponseWriter, r *router.Request) {
 		w.Write([]byte("responded"))
 	})
 
@@ -89,7 +89,7 @@ func main() {
 	r.Use(router.Timeout(5)) // can be any time (its in seconds) depending on how long you want the time limit on every request.
 	// the Timeout mw is used for prevent slow requests by setting a timeout in which the request should last.
 
-	r.Handle(http.MethodGet, "/resp", func(w http.ResponseWriter, r *http.Request) {
+	r.Handle(http.MethodGet, "/resp", func(w http.ResponseWriter, r *router.Request) {
 		w.Write([]byte("responded"))
 	})
 
@@ -118,7 +118,7 @@ import (
 func main() {
 	r := router.NewRouter()
 
-	r.Handle(http.MethodGet, "/greet", func(w http.ResponseWriter, r *http.Request) {
+	r.Handle(http.MethodGet, "/greet", func(w http.ResponseWriter, r *router.Request) {
 		w.Write([]byte("hello"))
 	}, router.Recoverer(), router.Logger()) // you can do route-specific middleware(s) like this (can be 1 or many).
 

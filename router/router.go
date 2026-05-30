@@ -92,7 +92,7 @@ func (r *Router) Handle(method string, path string, handler HandlerFunc, mws ...
 	r.StaticRoutes[path][method] = handler // assign both static route path and method to handler
 }
 
-// core routing logic for my router
+// routing logic
 func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// making all routes normalised without a / at the end, but with root /.
 	// for example. Input: "/users//" output: "/users", input: "users/1" output: "/users/1"
@@ -102,7 +102,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// attempt static routes (lower time complexity compared to dynamicRoutes which requires looping over routes (O(n)))
-	if methods, ok := s.StaticRoutes[r.URL.Path]; ok { // validate if route path exists
+	if methods, ok := s.StaticRoutes[path]; ok { // validate if route path exists
 		if handler, ok := methods[r.Method]; ok { // also check if method for route path is appropriate
 			finalHandler := s.ApplyMiddlewares(handler) // apply middlewares if included
 			finalHandler(w, &Request{
@@ -118,7 +118,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// attempt dynamic routes (higher time complexity than staticRoutes (which are O(1)))
 
-	parts := splitPath(r.URL.Path)
+	parts := splitPath(path)
 
 	for _, route := range s.DynamicRoutes[r.Method] { // loop over dynamic routes which are grouped by methods
 

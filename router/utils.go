@@ -31,7 +31,7 @@ func match(routeP []string, reqP []string) (bool, map[string]string) {
 		return false, nil
 	}
 
-	params := make(map[string]string, 1000) // return value
+	params := make(map[string]string, 500) // preallocate number of params
 
 	for v := range routeP { // can use both reqP and routeP to loop over
 		rp := routeP[v]
@@ -48,6 +48,8 @@ func match(routeP []string, reqP []string) (bool, map[string]string) {
 			return false, nil
 		}
 	}
+
+	//
 
 	// everything matched
 	return true, params

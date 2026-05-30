@@ -32,6 +32,7 @@ import (
 	"github.com/72sevenzy2/json-parser/helpers"
 )
 
+
 // custom request struct to hold routing essentials,
 type Request struct {
 	*http.Request
@@ -44,16 +45,16 @@ type HandlerFunc func(http.ResponseWriter, *Request)
 
 // Route struct to loop over dynamic routes
 type Route struct {
-	Method  string
-	Parts   []string
 	Handler HandlerFunc
+	Parts   []string
+	Method  string
 }
 
 // Router struct to hold all static/dynamic routes
 type Router struct {
-	StaticRoutes  map[string]map[string]HandlerFunc
 	DynamicRoutes map[string][]Route // split dynamic routes by methods to reduce lookup time
 	Middlewares   []Middleware       // storing our middlewares here (type is our Middleware function type)
+	StaticRoutes  map[string]map[string]HandlerFunc
 }
 
 func NewRouter() *Router {

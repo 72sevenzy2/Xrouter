@@ -31,7 +31,7 @@ func match(routeP []string, reqP []string) (bool, map[string]string) {
 		return false, nil
 	}
 
-	params := make(map[string]string) // return value
+	params := make(map[string]string, 500) // preallocate number of params
 
 	for v := range routeP { // can use both reqP and routeP to loop over
 		rp := routeP[v]
@@ -49,6 +49,8 @@ func match(routeP []string, reqP []string) (bool, map[string]string) {
 		}
 	}
 
+	//
+
 	// everything matched
 	return true, params
 }
@@ -59,7 +61,8 @@ type LimitedBuffer struct {
 	limit uint32
 }
 
-func (l *LimitedBuffer) Write(p []byte) (int, error) { // write func
+// custom write func for LimitedBuffer, (allocates new slice based on truncated size on original slice)
+func (l *LimitedBuffer) Write(p []byte) (int, error) {
 	remaining := l.limit - uint32(l.buf.Len())
 
 	if remaining <= 0 {

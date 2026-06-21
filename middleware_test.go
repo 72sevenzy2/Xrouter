@@ -31,3 +31,27 @@ func TestBasicAuth(t *testing.T) {
 	}
 	fmt.Println("successful.")
 }
+
+func TestBearerAuth(t *testing.T) {
+	b := router.NewRouter()
+
+	b.Use(router.BearerAuth("bearerauth123"))
+
+	b.Handle(http.MethodGet, "/foo2", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/foo2", nil)
+	// set auth header and key for BearerAuth()
+
+	req.Header.Set("Authorization", "bearerauth123")
+
+	rr := httptest.NewRecorder()
+
+	b.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("failed auth with status %d", rr.Code)
+	}
+	fmt.Println("successful.")
+}

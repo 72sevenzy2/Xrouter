@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,7 +15,6 @@ func TestBasicAuth(t *testing.T) {
 	// apply auth middleware
 	b.Use(router.BasicAuth("user1", "pass1"))
 
-	
 	b.Handle(http.MethodGet, "/foo1", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
@@ -29,4 +29,5 @@ func TestBasicAuth(t *testing.T) {
 	if rr.Code != http.StatusOK {
 		t.Fatalf("failed with status %d", rr.Code)
 	}
+	fmt.Println("successful.")
 }

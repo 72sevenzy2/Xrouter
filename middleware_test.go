@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -59,7 +60,6 @@ func TestBearerAuth(t *testing.T) {
 }
 
 // test func to check if logger mw calls next middleware:
-
 func TestLoggerNext(t *testing.T) {
 	called := false
 
@@ -82,4 +82,25 @@ func TestLoggerNext(t *testing.T) {
 		t.Fatalf("failed with status %d", rr.Code)
 	}
 
+}
+
+// test to make sure logger preserves data (body)
+func TestLoggerBody(t *testing.T) {
+	next := func (w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if string(body) != "testC" {
+			t.Fatalf("expected body %q, received %q", "testC", string(body))
+		}
+	}
+
+	handler := router.Logger(1024)(next)
+
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader("testC"))
+	rr := httptest.NewRecorder()
+
+	handler(rr, req)
 }

@@ -118,7 +118,7 @@ func BearerAuth(AuthKey string) Middleware {
 				helpers.Failed(w, http.StatusInternalServerError, errors.New("please include a stronger AuthKey."))
 				return
 			}
-
+			
 			authLab := r.Header.Get("Authorization") // grabbing the token
 
 			token := strings.TrimPrefix(authLab, "Bearer ") // removing the "bearer " part of the token to then compare it to the authkey

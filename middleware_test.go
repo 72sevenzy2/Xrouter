@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/72sevenzy2/http-router/router"
 )
 
+// auth testing
 func TestBasicAuth(t *testing.T) {
 	b := router.NewRouter()
 
@@ -54,4 +56,30 @@ func TestBearerAuth(t *testing.T) {
 		t.Fatalf("failed auth with status %d", rr.Code)
 	}
 	fmt.Println("successful.")
+}
+
+// test func to check if logger mw calls next middleware:
+
+func TestLoggerNext(t *testing.T) {
+	called := false
+
+	next := func (w http.ResponseWriter, r *http.Request)  {
+		called = true
+		w.WriteHeader(http.StatusOK)
+	}
+
+	handler := router.Logger(1024)(next)
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader("test"))
+	rr := httptest.NewRecorder()
+
+	handler(rr, req)
+
+	if !called {
+		fmt.Println("logger did not call next().")
+	}
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("failed with status %d", rr.Code)
+	}
+
 }

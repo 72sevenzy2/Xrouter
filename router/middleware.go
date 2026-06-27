@@ -196,7 +196,7 @@ func (r *Router) ApplyMiddlewares(h HandlerFunc) HandlerFunc {
 	return h
 }
 
-// Use func to use the middewares (also appending it to the Middlewares type in router struct
-func (r *Router) Use(s Middleware) {
-	r.Middlewares = append(r.Middlewares, s)
-}
+// // Use func to use the middewares (also appending it to the Middlewares type in router struct
+// func (r *Group) Use(s Middleware) {
+// 	r.mws = append(r.mws, s)
+// }

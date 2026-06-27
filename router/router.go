@@ -60,7 +60,7 @@ type Router struct {
 type Group struct {
 	router *Router
 	prefix string
-	mws    []Middleware
+	mws []Middleware
 }
 
 // group method for adding a parent route
@@ -71,11 +71,22 @@ func (r *Router) Group(p string) *Group {
 	}
 }
 
+// Use func to use the middewares (also appending it to the Middlewares type in router struct
+func (r *Router) Use(s Middleware) { // global
+	r.Middlewares = append(r.Middlewares, s)
+}
+
+// Group based middleware
+func (g *Group) Use(s Middleware) {
+	g.mws = append(g.mws, s)
+}
+
 // initialise a new router.
 func NewRouter() *Router {
 	// contructing the router upon the func being called
 	return &Router{
 		StaticRoutes: make(map[string]map[string]HandlerFunc), // initialising the map of map)
+		DynamicRoutes: make(map[string][]Route),
 	} // which is just: "PATH": "...": "METHOD": ... (method can be either get, post, put, etc)
 }
 

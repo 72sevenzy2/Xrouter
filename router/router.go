@@ -32,7 +32,6 @@ import (
 	"github.com/72sevenzy2/json-parser/helpers"
 )
 
-	
 // custom request struct to hold routing essentials,
 type Request struct {
 	*http.Request
@@ -57,6 +56,22 @@ type Router struct {
 	StaticRoutes  map[string]map[string]HandlerFunc
 }
 
+// group type (for route grouping)
+type Group struct {
+	router *Router
+	prefix string
+	mws    []Middleware
+}
+
+// group method for adding a parent route
+func (r *Router) Group(p string) *Group {
+	return &Group{
+		router: r,
+		prefix: p,
+	}
+}
+
+// initialise a new router.
 func NewRouter() *Router {
 	// contructing the router upon the func being called
 	return &Router{

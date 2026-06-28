@@ -59,16 +59,19 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 			defer buff.Put(buf)               // add buf to the buffer pool
 
 			// setting default value first for request body size
-			opt := bodySize{
-				size: 1024, // 1kb
+
+			var opt bodySize
+			// only set if confSize was set to 0 (will indicate to user in docs):
+			if confSize == 0 {
+				opt = bodySize{
+					size: 1024, // 1kb
+				}
 			}
 
 			// apply custom size
-			if confSize != 0 {
 				opt = bodySize{
 					size: confSize,
 				}
-			}
 
 			// limit size
 			lm := &LimitedBuffer{
@@ -90,7 +93,7 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 			// compressing body if over 1 kb
 			body := buf.Bytes()
 			if uint32(len(body)) > opt.size {
-				body = body[:opt.size]; // truncated
+				body = body[:opt.size] // truncated
 				fmt.Println("body has been truncated.")
 			}
 
@@ -118,14 +121,14 @@ func BearerAuth(AuthKey string) Middleware {
 				helpers.Failed(w, http.StatusInternalServerError, errors.New("please include a stronger AuthKey."))
 				return
 			}
-			
+
 			authLab := r.Header.Get("Authorization") // grabbing the token
 
 			token := strings.TrimPrefix(authLab, "Bearer ") // removing the "bearer " part of the token to then compare it to the authkey
 
 			if token == authLab || token != AuthKey { // check if the authkey is matching
 				helpers.Failed(w, http.StatusForbidden, errors.New("Invalid Token")) // if not then throw a failed json response
-				return                                                   // exit the request
+				return                                                               // exit the request
 			}
 
 			hf(w, r) // continue to next handler

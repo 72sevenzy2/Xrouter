@@ -142,6 +142,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if handler, ok := methods[r.Method]; ok { // also check if method for route path is appropriate
 			finalHandler := s.ApplyMiddlewares(handler) // apply middlewares if included
 			finalHandler(w, &Request{
+				Request: r,
 				contextReq: r,
 			}) // run handler
 			return
@@ -166,6 +167,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		final := s.ApplyMiddlewares(route.Handler)
 		final(w, &Request{ // store params
 			Request: r,
+
 			params:  params,
 		})
 		return

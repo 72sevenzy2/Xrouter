@@ -124,10 +124,21 @@ func BearerAuth(AuthKey string) Middleware {
 
 			authLab := r.Header.Get("Authorization") // grabbing the token
 
-			token := strings.TrimPrefix(authLab, "Bearer ") // removing the "bearer " part of the token to then compare it to the authkey
+			var token string
+			if v := strings.Contains(AuthKey, "Bearer "); v {
+				token = strings.TrimPrefix(authLab, "Bearer ") // removing the "bearer " part of the token to then compare it to the authkey
 
-			if token == authLab || token != AuthKey { // check if the authkey is matching
-				helpers.Failed(w, http.StatusForbidden, errors.New("Invalid Token")) // if not then throw a failed json response
+				if token != AuthKey {
+					helpers.Failed(w, http.StatusForbidden, errors.New("invalid token."))
+					return
+				}
+
+				hf(w, r) // next handler
+			}
+
+			// continuing if "Bearer " doesnt include in the authkey.
+			if AuthKey != authLab { // check if the authkey is matching
+				helpers.Failed(w, http.StatusForbidden, errors.New("invalid token.")) // if not then throw a failed json response
 				return                                                               // exit the request
 			}
 

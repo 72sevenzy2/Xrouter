@@ -51,7 +51,7 @@ func TestBearerAuth(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/foo2", nil)
 	// set auth header and key for BearerAuth()
 
-	req.Header.Set("Authorization", "bearerauth123")
+	req.Header.Set("Authorization", "Bearer bearerauth123")
 
 	rr := httptest.NewRecorder()
 

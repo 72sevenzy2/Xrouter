@@ -83,7 +83,8 @@ func main() {
 	r := router.NewRouter()
 
 	r.Use(router.Recoverer()) // recoverer middleware always goes first, prevents server crashes when a bug has occured.
-	r.Use(router.Logger()) // standard logging middleware (to view request details.)
+	r.Use(router.Logger(0)) // standard logging, in which param 0 indicates default body size logging.
+
 	r.Use(router.BearerAuth("secretKey")) // can be any token (which has to be a string),
 	r.Use(router.BasicAuth("user1", "password1234")) // parameters username and password need to be included when using.
 	r.Use(router.Timeout(5)) // can be any time (its in seconds) depending on how long you want the time limit on every request.
@@ -100,7 +101,7 @@ func main() {
 }
 
 ```
-^ it is also important to note that you can limit how much the logging middleware reads from the request body, the default is 1 kilobyte as of now, but you can change it via passing in a SetBody() func as the parameter in the Logger() func, an example would be: "r.Use(router.Logger(SetBody(1024 * 2)))" (limit to 2 kilobytes.) but make sure the size your going to configure is of appropriate type (int64).
+^ you can limit how much the logging middleware reads from the request body, the default size set is 1kb, but you can change it via passing in a SetBody() func as the parameter in the Logger() func, an example would be: "r.Use(router.Logger(SetBody(1024 * 2)))" (limit to 2 kilobytes.) but make sure the size your going to configure is of appropriate type (int64).
 <br>
 
 while using the timeout middleware it is also important to note that whilst using it as so, your handler would also need to explicitly coorporate with the middleware inorder for the request to cancel after a given time, so example:

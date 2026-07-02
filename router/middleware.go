@@ -52,7 +52,7 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 	return func(hf HandlerFunc) HandlerFunc {
 		return func(w http.ResponseWriter, r *Request) {
 			start := time.Now() // setting the current time (before the request has ended)
-			fmt.Printf("Request has started with URL: %s, and method: %s, and in time: %s\n", &r.URL, &r.Method, start)
+			fmt.Printf("Request has started with URL: %s, and method: %s, and in time: %s\n", r.URL, r.Method, start)
 
 			buf := buff.Get().(*bytes.Buffer) // reusable buffer.
 			buf.Reset()                       // reset buffer before use.
@@ -117,7 +117,7 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 func BearerAuth(AuthKey string) Middleware {
 	return func(hf HandlerFunc) HandlerFunc {
 		return func(w http.ResponseWriter, r *Request) {
-			if len(AuthKey) <= 1 { // check if authkey has less than 2 character
+			if len(AuthKey) <= 1 { // check if authkey has less than 1 character
 				helpers.Failed(w, http.StatusInternalServerError, errors.New("please include a stronger AuthKey."))
 				return
 			}

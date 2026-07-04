@@ -65,9 +65,17 @@ type Group struct {
 
 // group method (adding a parent route)
 func (r *Router) Group(p string) *Group {
+	var updPath string
+	updPath = p
+
+	// make sure "/" is included in str
+	if string(p[0]) != "/" {
+		updPath = "/" + p
+	}
+
 	return &Group{
 		router: r,
-		prefix: p,
+		prefix: updPath,
 	}
 }
 
@@ -83,6 +91,8 @@ func (g *Group) Use(s Middleware) {
 
 // Handler func for grouped routes.
 func (g *Group) Handle(method, path string, handler HandlerFunc, mws ...Middleware) {
+
+
 	newPath := g.prefix + path // path included with parent route
 
 	mw := append([]Middleware{}, g.mws...) // appending empty Middleware slice, and storing g.mws  (group based middleware)

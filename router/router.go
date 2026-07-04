@@ -93,7 +93,7 @@ func (g *Group) Use(s Middleware) {
 func (g *Group) Handle(method, path string, handler HandlerFunc, mws ...Middleware) {
 
 
-	newPath := g.prefix + path // path included with parent route
+	newPath := Join(g.prefix, path) // path included with parent route
 
 	mw := append([]Middleware{}, g.mws...) // appending empty Middleware slice, and storing g.mws  (group based middleware)
 	mw = append(mw, mws...) // appending route specific middleware

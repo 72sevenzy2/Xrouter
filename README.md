@@ -101,7 +101,7 @@ func main() {
 }
 
 ```
-^ you can limit how much the logging middleware reads from the request body, the default size set is 1kb, but you can change it via passing in a SetBody() func as the parameter in the Logger() func, an example would be: "r.Use(router.Logger(SetBody(1024 * 2)))" (limit to 2 kilobytes.) but make sure the size your going to configure is of appropriate type (int64).
+^ you can limit how much the logging middleware reads from the request body, the default size set is 1kb, but you can change it via passing in an int in the Logger() func, an example: "r.Use(router.Logger(1024 * 2)" (limit to 2 kilobytes.) but make sure the size your going to configure is of appropriate type (uint32).
 <br>
 
 while using the timeout middleware it is also important to note that whilst using it as so, your handler would also need to explicitly coorporate with the middleware inorder for the request to cancel after a given time, so example:
@@ -142,7 +142,7 @@ func main() {
 
 	r.Handle(http.MethodGet, "/greet", func(w http.ResponseWriter, r *router.Request) {
 		w.Write([]byte("hello"))
-	}, router.Recoverer(), router.Logger()) // you can do route-specific middleware(s) like this (can be 1 or many).
+	}, router.Recoverer(), router.Logger(0)) // you can do route-specific middleware(s) like this (can be 1 or many).
 
 	fmt.Println("server running on port 8080")
 	if err := http.ListenAndServe(":8080", r); err != nil {

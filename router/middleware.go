@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/72sevenzy2/json-parser/helpers"
@@ -41,12 +40,12 @@ type bodySize struct {
 	size uint32
 }
 
-// object pooling for request body logs
-var buff = sync.Pool{
-	New: func() any {
-		return new(bytes.Buffer)
-	},
-}
+// // object pooling for request body logs
+// var buff = sync.Pool{
+// 	New: func() any {
+// 		return new(bytes.Buffer)
+// 	},
+// }
 
 func Logger(confSize uint32) Middleware { // returns the middleware type
 	return func(hf HandlerFunc) HandlerFunc {
@@ -54,9 +53,8 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 			start := time.Now() // setting the current time (before the request has ended)
 			fmt.Printf("Request has started with URL: %s, and method: %s, and in time: %s\n", r.URL, r.Method, start)
 
-			buf := buff.Get().(*bytes.Buffer) // reusable buffer.
-			buf.Reset()                       // reset buffer before use.
-			defer buff.Put(buf)               // add buf to the buffer pool
+			// buffer for comparison in limited writer Write().
+			buf := bytes.Buffer{}
 
 			// setting default value first for request body size
 
@@ -75,7 +73,7 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 
 			// limit size
 			lm := &LimitedBuffer{
-				buf:   buf,
+				buf:   &buf,
 				limit: opt.size + 1,
 			}
 

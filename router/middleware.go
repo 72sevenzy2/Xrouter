@@ -172,9 +172,11 @@ func Timeout(seconds int) Middleware {
 
 			defer cancel() // cancelling at the end of the func (current handler)
 
-			hf(w, &Request{
-				contextReq: r.WithContext(ctx), // pass in with request context (creates shallow copy of the original request and runs it with context)
-			}) // ServeHTTP(w, and "r" with the context 'ctx')
+			// shallow copy of original request, (preserving other Request{} fields)
+			req := *r
+			req.Request = r.WithContext(ctx)
+
+			hf(w, &req)
 		}
 	}
 }

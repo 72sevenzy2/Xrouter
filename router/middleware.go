@@ -87,10 +87,10 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 				status:         http.StatusOK,
 			}
 
-			hf(rw, r) // calling the next function to continue to the next handler
+			hf(rw, r)
 			// by calling hf() before printing, we give time to the io Readers above to read the request body data.
 
-			// compressing body if over 1 kb
+			// truncating if over 1 kb
 			body := buf.Bytes()
 			if uint32(len(body)) > opt.size {
 				body = body[:opt.size] // truncated

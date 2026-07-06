@@ -56,6 +56,12 @@ type Router struct {
 	StaticRoutes  map[string]map[string]HandlerFunc
 }
 
+
+// Use func to use the middewares (also appending it to the Middlewares type in router struct
+func (r *Router) Use(s Middleware) { // global
+	r.Middlewares = append(r.Middlewares, s)
+}
+
 // group type (for route grouping)
 type Group struct {
 	router *Router
@@ -79,10 +85,6 @@ func (r *Router) Group(p string) *Group {
 	}
 }
 
-// Use func to use the middewares (also appending it to the Middlewares type in router struct
-func (r *Router) Use(s Middleware) { // global
-	r.Middlewares = append(r.Middlewares, s)
-}
 
 // Group based middleware
 func (g *Group) Use(s Middleware) {

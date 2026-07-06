@@ -70,13 +70,20 @@ type Group struct {
 }
 
 // group method (adding a parent route)
-func (r *Router) Group(p string) *Group {
+func (r *Router) Group(p string, nests ...string) *Group {
 	var updPath string
 	updPath = p
 
 	// make sure "/" is included in str
 	if string(p[0]) != "/" {
 		updPath = "/" + p
+	}
+
+	if len(nests) != 0 {
+		// updPath = Join(updPath, nests[])
+		for i := range nests {
+			updPath = Join(updPath, nests[i])
+		}
 	}
 
 	return &Group{

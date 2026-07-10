@@ -69,7 +69,8 @@ type Group struct {
 	mws    []Middleware
 }
 
-// group method (adding a parent route)
+// the router Group() method works such that when it is registered, child routes can also be registered using the parent route as it would be of type *Group, in which the child route would also inherit the parent routes middlewares.
+// parent group method
 func (r *Router) Group(p string, nests ...string) *Group {
 	var updPath string
 	updPath = p
@@ -96,6 +97,17 @@ func (r *Router) Group(p string, nests ...string) *Group {
 // Group based middleware
 func (g *Group) Use(s Middleware) {
 	g.mws = append(g.mws, s)
+}
+
+// group method for child routes
+func (g *Group) Group(prefix string) *Group {
+	cmws := append([]Middleware{}, g.mws...) // copy previous route nodes mw collection (each childing having their own mw slice to do so)
+
+	return &Group{
+		router: g.router,
+		prefix: Join(g.prefix, prefix), 
+		mws: cmws,
+	}
 }
 
 // Handler func for grouped routes.

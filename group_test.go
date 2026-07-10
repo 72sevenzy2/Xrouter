@@ -48,3 +48,30 @@ func TestInlineNests(t *testing.T) {
 		t.Log(req.URL.Path)
 	}
 }
+
+// nested grouping test
+
+func TestNestedGroups(t *testing.T) {
+	b := router.NewRouter()
+
+	api := b.Group("/parent")
+
+	v1 := api.Group("/child1")
+	v1.Use(router.Logger(0))
+
+	v2 := v1.Group("/child2")
+	v2.Use(router.Recoverer())
+
+	v2.Handle(http.MethodGet, "/testchild", func(w http.ResponseWriter, r *router.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	rr := httptest.NewRequest(http.MethodGet, "/parent/child1/child2/testchild", nil)
+	req := httptest.NewRecorder()
+
+	b.ServeHTTP(req, rr)
+
+	if req.Code != http.StatusOK { // didnt cross endpoint
+		t.Fatalf("failed on path: %s", rr.URL.Path)
+	}
+}

@@ -22,13 +22,13 @@ type responseWriter struct {
 	size   int
 }
 
-// override WriteHeader func()
+// override WriteHeader with custom response writer struct
 func (rw *responseWriter) WriteHeader(code int) {
 	rw.status = code // saving status code in struct
 	rw.ResponseWriter.WriteHeader(code)
 }
 
-// overriding Write to capture bytes
+// overriding Write to capture byte size
 func (rw *responseWriter) Write(b []byte) (int, error) {
 	v, err := rw.ResponseWriter.Write(b)
 	rw.size += v // tracking the size in bytes
@@ -39,13 +39,6 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 type bodySize struct {
 	size uint32
 }
-
-// // object pooling for request body logs
-// var buff = sync.Pool{
-// 	New: func() any {
-// 		return new(bytes.Buffer)
-// 	},
-// }
 
 func Logger(confSize uint32) Middleware { // returns the middleware type
 	return func(hf HandlerFunc) HandlerFunc {
@@ -98,7 +91,7 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 			endTime := time.Since(start) // after the request has ended, in which we will print below
 			fmt.Printf("request has ended: %s, with status code %d ||| and with response body size (in bytes): %d", endTime, rw.status, rw.size)
 
-			fmt.Println("request body data: (with data size of:)", opt.size)
+			fmt.Println("\nrequest body data: (with data size of:)", opt.size)
 			fmt.Println(string(body))
 
 			// redacting sensitive header before printing

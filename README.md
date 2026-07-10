@@ -152,3 +152,5 @@ func main() {
 }
 
 ```
+<br>
+<h3 align="center">also, when writing handlers, do make sure your using the custom Request struct instead of http.Request, (router.Request).</h3>

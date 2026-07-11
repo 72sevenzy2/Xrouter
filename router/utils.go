@@ -75,3 +75,15 @@ func (l *LimitedBuffer) Write(p []byte) (int, error) {
 
 	return l.buf.Write(p)
 }
+
+// path joining helper (for Grouping)
+func Join(p1, p2 string) string {
+	switch {
+	case p1 == "/":
+		return "/" + strings.TrimLeft(p2, "/")
+	case p2 == "/":
+		return strings.TrimRight(p1, "/") + "/"
+	default:
+		return strings.TrimRight(p1, "/") + "/" + strings.TrimLeft(p2, "/")
+	}
+}

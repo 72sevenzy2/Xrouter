@@ -4,6 +4,7 @@
 # key features:
 
 - Utilises an custom handler type to hold route parameters and context.
+- Includes route grouping for nested routes.
 - No external dependencies used, other than a tool (json-parser) i made to handle json responses which is used here.
 - Includes middleware(s) > basicAuth (with username and password), BearerAuth (with a bearer token), logging middleware, a timeout middleware (to cut off slow requests), and a recoverer middleware to prevent server crashes.
 - Route specific middleware(s) > supports middlewares for specific routes without applying globally to all the routes.
@@ -66,8 +67,49 @@ func main() {
 }
 
 ```
-<h3 align="center">That of course is a example with no middlewares attached yet.</h3>
-<h2 align="center" style.Background="gray">Example usage with all the middlewares:</h2>
+<h2 align="center">And for route grouping:</h2>
+
+```
+package main
+
+import (
+	"net/http"
+
+	"github.com/72sevenzy2/http-router/router"
+)
+
+func main() {
+	r := router.NewRouter()
+
+	api := r.Group("/parent")
+	/* 
+	for inline nesting (without having to create seperate child routes individually):
+	
+	api := r.Group("/parent", "child1", "child2")
+	(in which the registered route would be /parent/child1/child2 )
+
+	though this prevents configuring middleware for a specific route
+	*/
+
+	v1 := api.Group("/child1")
+	v1.Use(router.Logger(0)) // can utilise middleware along with nested routes
+
+	v2 := v1.Group("/child2")
+	v2.Use(router.BasicAuth("username", "password")) // would indicate only this route having this middleware
+
+	v2.Handle(http.MethodGet, "/test", func(w http.ResponseWriter, r *router.Request) {
+		w.Write([]byte("pong"))
+	})
+
+	err := http.ListenAndServe(":8080", r)
+	if err != nil {
+		panic(err)
+	}
+}
+```
+
+<br>
+<h2 align="center" style.Background="gray">Usage with all the middleware(s):</h2>
 
 ```
 
@@ -152,5 +194,4 @@ func main() {
 }
 
 ```
-<br>
-<h3 align="center">also, when writing handlers, do make sure your using the custom Request struct instead of http.Request, (router.Request).</h3>
+<h4 align="center">when writing handlers, do make sure your using the custom Request struct instead of http.Request, (router.Request).</h4>

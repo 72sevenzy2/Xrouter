@@ -41,6 +41,8 @@ func main() {
 
 ```
 <br>
+<h4 align="center">(when writing handlers, do make sure your using the custom Request struct instead of http.Request), which is router.Request</h4>
+
 <h1 align="center">General usage:</h1>
 
 ```
@@ -194,4 +196,3 @@ func main() {
 }
 
 ```
-<h4 align="center">when writing handlers, do make sure your using the custom Request struct instead of http.Request, (router.Request).</h4>

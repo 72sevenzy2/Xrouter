@@ -32,7 +32,6 @@ import (
 	"github.com/72sevenzy2/json-parser/helpers"
 )
 
-
 // custom request struct to hold routing essentials,
 type Request struct {
 	*http.Request
@@ -57,10 +56,78 @@ type Router struct {
 	StaticRoutes  map[string]map[string]HandlerFunc
 }
 
+
+// Use func to use the middewares (also appending it to the Middlewares type in router struct
+func (r *Router) Use(s Middleware) { // global
+	r.Middlewares = append(r.Middlewares, s)
+}
+
+// group type (for route grouping)
+type Group struct {
+	router *Router
+	prefix string
+	mws    []Middleware
+}
+
+// the router Group() method works such that when it is registered, child routes can also be registered using the parent route as it would be of type *Group, in which the child route would also inherit the parent routes middlewares.
+// parent group method
+func (r *Router) Group(p string, nests ...string) *Group {
+	var updPath string
+	updPath = p
+
+	// make sure "/" is included in str
+	if string(p[0]) != "/" {
+		updPath = "/" + p
+	}
+
+	if len(nests) != 0 {
+		// updPath = Join(updPath, nests[])
+		for i := range nests {
+			updPath = Join(updPath, nests[i])
+		}
+	}
+
+	return &Group{
+		router: r,
+		prefix: updPath,
+	}
+}
+
+
+// Group based middleware
+func (g *Group) Use(s Middleware) {
+	g.mws = append(g.mws, s)
+}
+
+// group method for child routes
+func (g *Group) Group(prefix string) *Group {
+	cmws := append([]Middleware{}, g.mws...) // copy previous route nodes mw collection (each childing having their own mw slice to do so)
+
+	return &Group{
+		router: g.router,
+		prefix: Join(g.prefix, prefix), 
+		mws: cmws,
+	}
+}
+
+// Handler func for grouped routes.
+func (g *Group) Handle(method, path string, handler HandlerFunc, mws ...Middleware) {
+
+
+	newPath := Join(g.prefix, path) // path included with parent route
+
+	mw := append([]Middleware{}, g.mws...) // appending empty Middleware slice, and storing g.mws  (group based middleware)
+	mw = append(mw, mws...) // appending route specific middleware
+
+	g.router.Handle(method, newPath, handler, mw...)
+}
+
+// initialise a new router.
 func NewRouter() *Router {
 	// contructing the router upon the func being called
 	return &Router{
-		StaticRoutes: make(map[string]map[string]HandlerFunc), // initialising the map of map)
+		StaticRoutes:  make(map[string]map[string]HandlerFunc), // initialising the map of map)
+		DynamicRoutes: make(map[string][]Route),
 	} // which is just: "PATH": "...": "METHOD": ... (method can be either get, post, put, etc)
 }
 
@@ -106,6 +173,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if handler, ok := methods[r.Method]; ok { // also check if method for route path is appropriate
 			finalHandler := s.ApplyMiddlewares(handler) // apply middlewares if included
 			finalHandler(w, &Request{
+				Request: r,
 				contextReq: r,
 			}) // run handler
 			return
@@ -130,6 +198,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		final := s.ApplyMiddlewares(route.Handler)
 		final(w, &Request{ // store params
 			Request: r,
+
 			params:  params,
 		})
 		return

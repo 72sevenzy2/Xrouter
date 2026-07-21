@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/72sevenzy2/json-parser/helpers"
@@ -23,13 +22,13 @@ type responseWriter struct {
 	size   int
 }
 
-// override WriteHeader func()
+// override WriteHeader with custom response writer struct
 func (rw *responseWriter) WriteHeader(code int) {
 	rw.status = code // saving status code in struct
 	rw.ResponseWriter.WriteHeader(code)
 }
 
-// overriding Write to capture bytes
+// overriding Write to capture byte size
 func (rw *responseWriter) Write(b []byte) (int, error) {
 	v, err := rw.ResponseWriter.Write(b)
 	rw.size += v // tracking the size in bytes
@@ -41,30 +40,25 @@ type bodySize struct {
 	size uint32
 }
 
-// object pooling for request body logs
-var buff = sync.Pool{
-	New: func() any {
-		return new(bytes.Buffer)
-	},
-}
-
 func Logger(confSize uint32) Middleware { // returns the middleware type
 	return func(hf HandlerFunc) HandlerFunc {
 		return func(w http.ResponseWriter, r *Request) {
 			start := time.Now() // setting the current time (before the request has ended)
 			fmt.Printf("Request has started with URL: %s, and method: %s, and in time: %s\n", r.URL, r.Method, start)
 
-			buf := buff.Get().(*bytes.Buffer) // reusable buffer.
-			buf.Reset()                       // reset buffer before use.
-			defer buff.Put(buf)               // add buf to the buffer pool
+			// buffer for comparison in limited writer Write().
+			buf := bytes.Buffer{}
 
 			// setting default value first for request body size
-			opt := bodySize{
-				size: 1024, // 1kb
-			}
 
-			// apply custom size
-			if confSize != 0 {
+			var opt bodySize
+			// only set if confSize was set to 0 (will indicate to user in docs):
+			if confSize == 0 {
+				opt = bodySize{
+					size: 1024, // 1kb
+				}
+			} else {
+				// apply custom size
 				opt = bodySize{
 					size: confSize,
 				}
@@ -72,7 +66,7 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 
 			// limit size
 			lm := &LimitedBuffer{
-				buf:   buf,
+				buf:   &buf,
 				limit: opt.size + 1,
 			}
 
@@ -84,20 +78,20 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 				status:         http.StatusOK,
 			}
 
-			hf(rw, r) // calling the next function to continue to the next handler
+			hf(rw, r)
 			// by calling hf() before printing, we give time to the io Readers above to read the request body data.
 
-			// compressing body if over 1 kb
+			// truncating if over 1 kb
 			body := buf.Bytes()
 			if uint32(len(body)) > opt.size {
-				body = body[:opt.size]; // truncated
+				body = body[:opt.size] // truncated
 				fmt.Println("body has been truncated.")
 			}
 
 			endTime := time.Since(start) // after the request has ended, in which we will print below
 			fmt.Printf("request has ended: %s, with status code %d ||| and with response body size (in bytes): %d", endTime, rw.status, rw.size)
 
-			fmt.Println("request body data: (with data size of:)", opt.size)
+			fmt.Println("\nrequest body data: (with data size of:)", opt.size)
 			fmt.Println(string(body))
 
 			// redacting sensitive header before printing
@@ -114,18 +108,29 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 func BearerAuth(AuthKey string) Middleware {
 	return func(hf HandlerFunc) HandlerFunc {
 		return func(w http.ResponseWriter, r *Request) {
-			if len(AuthKey) <= 1 { // check if authkey has less than 2 character
+			if len(AuthKey) <= 1 { // check if authkey has less than 1 character
 				helpers.Failed(w, http.StatusInternalServerError, errors.New("please include a stronger AuthKey."))
 				return
 			}
-			
+
 			authLab := r.Header.Get("Authorization") // grabbing the token
 
-			token := strings.TrimPrefix(authLab, "Bearer ") // removing the "bearer " part of the token to then compare it to the authkey
+			var token string
+			if v := strings.Contains(AuthKey, "Bearer "); v {
+				token = strings.TrimPrefix(authLab, "Bearer ") // removing the "bearer " part of the token to then compare it to the authkey
 
-			if token == authLab || token != AuthKey { // check if the authkey is matching
-				helpers.Failed(w, http.StatusForbidden, errors.New("Invalid Token")) // if not then throw a failed json response
-				return                                                   // exit the request
+				if token != AuthKey {
+					helpers.Failed(w, http.StatusForbidden, errors.New("invalid token."))
+					return
+				}
+
+				hf(w, r) // next handler
+			}
+
+			// continuing if "Bearer " doesnt include in the authkey.
+			if AuthKey != authLab { // check if the authkey is matching
+				helpers.Failed(w, http.StatusForbidden, errors.New("invalid token.")) // if not then throw a failed json response
+				return                                                               // exit the request
 			}
 
 			hf(w, r) // continue to next handler
@@ -160,9 +165,11 @@ func Timeout(seconds int) Middleware {
 
 			defer cancel() // cancelling at the end of the func (current handler)
 
-			hf(w, &Request{
-				contextReq: r.WithContext(ctx), // pass in with request context (creates shallow copy of the original request and runs it with context)
-			}) // ServeHTTP(w, and "r" with the context 'ctx')
+			// shallow copy of original request, (preserving other Request{} fields)
+			req := *r
+			req.Request = r.WithContext(ctx)
+
+			hf(w, &req)
 		}
 	}
 }
@@ -196,7 +203,7 @@ func (r *Router) ApplyMiddlewares(h HandlerFunc) HandlerFunc {
 	return h
 }
 
-// Use func to use the middewares (also appending it to the Middlewares type in router struct
-func (r *Router) Use(s Middleware) {
-	r.Middlewares = append(r.Middlewares, s)
-}
+// // Use func to use the middewares (also appending it to the Middlewares type in router struct
+// func (r *Group) Use(s Middleware) {
+// 	r.mws = append(r.mws, s)
+// }

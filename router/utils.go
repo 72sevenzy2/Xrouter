@@ -13,15 +13,6 @@ func isDynamic(path string) bool {
 // func to split route path
 func splitPath(path string) []string {
 	return strings.Split(strings.Trim(path, "/"), "/")
-	/*
-				Splits the route path as so:
-
-				example route: /users/42
-
-				strings.Trim(path, "/") splits any slashes from start to end from the route,
-				and strings.Split() splits the route from slashes ANYWHERE, so the route afterwards this block of code would look like:
-		 		{"users", "42"}, as strings.Split() returns as string array
-	*/
 }
 
 // func to match request parts and route parts

@@ -25,7 +25,6 @@ SOFTWARE.
 package router
 
 import (
-	"errors"
 	"net/http"
 	"strings"
 

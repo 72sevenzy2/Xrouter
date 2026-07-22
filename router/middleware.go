@@ -3,7 +3,6 @@ package router
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -109,7 +108,7 @@ func BearerAuth(AuthKey string) Middleware {
 	return func(hf HandlerFunc) HandlerFunc {
 		return func(w http.ResponseWriter, r *Request) {
 			if len(AuthKey) <= 1 { // check if authkey has less than 1 character
-				helpers.Failed(w, http.StatusInternalServerError, errors.New("please include a stronger AuthKey."))
+				helpers.Failed(w)
 				return
 			}
 
@@ -120,7 +119,7 @@ func BearerAuth(AuthKey string) Middleware {
 				token = strings.TrimPrefix(authLab, "Bearer ") // removing the "bearer " part of the token to then compare it to the authkey
 
 				if token != AuthKey {
-					helpers.Failed(w, http.StatusForbidden, errors.New("invalid token."))
+					helpers.Failed(w)
 					return
 				}
 
@@ -129,8 +128,8 @@ func BearerAuth(AuthKey string) Middleware {
 
 			// continuing if "Bearer " doesnt include in the authkey.
 			if AuthKey != authLab { // check if the authkey is matching
-				helpers.Failed(w, http.StatusForbidden, errors.New("invalid token.")) // if not then throw a failed json response
-				return                                                               // exit the request
+				helpers.Failed(w) // if not then throw a failed json response
+				return  // exit the request
 			}
 
 			hf(w, r) // continue to next handler
@@ -147,7 +146,7 @@ func BasicAuth(user, password string) Middleware { // implements the middleware 
 			authUser, authPassword, ok := r.BasicAuth() // extracting the user and password and if it exists (ok) from the r.BasicAuth() func, which is a built in method in go to do so, instead of manually parsing it ourselves.
 
 			if !ok || authUser != user || authPassword != password { // run the necessary logic
-				helpers.Failed(w, http.StatusForbidden, errors.New("invalid credentials."))
+				helpers.Failed(w)
 				return
 			}
 
@@ -182,7 +181,7 @@ func Recoverer() Middleware {
 			defer func() { // catches any crashses and recovers the request, while printing the err in return.
 				if err := recover(); err != nil {
 					fmt.Println("caught: ", err)
-					helpers.Failed(w, http.StatusInternalServerError, fmt.Errorf("server error: %s", err))
+					helpers.Failed(w)
 				}
 			}()
 
@@ -202,8 +201,3 @@ func (r *Router) ApplyMiddlewares(h HandlerFunc) HandlerFunc {
 
 	return h
 }
-
-// // Use func to use the middewares (also appending it to the Middlewares type in router struct
-// func (r *Group) Use(s Middleware) {
-// 	r.mws = append(r.mws, s)
-// }

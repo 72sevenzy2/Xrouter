@@ -52,15 +52,14 @@ func Logger(confSize uint32) Middleware { // returns the middleware type
 
 			var opt bodySize
 			// only set if confSize was set to 0 (will indicate to user in docs):
-			if confSize == 0 {
+			opt = bodySize{
+				size: 1024, // default
+			}
+			
+			if confSize != 0 {
 				opt = bodySize{
-					size: 1024, // 1kb
-				}
-			} else {
-				// apply custom size
-				opt = bodySize{
-					size: confSize,
-				}
+					size: confSize, // custom size
+				}	
 			}
 
 			// limit size

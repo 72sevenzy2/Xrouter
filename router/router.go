@@ -180,7 +180,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// otherwise return err if method is invalid
-		helpers.Failed(w, http.StatusMethodNotAllowed, errors.New("method not allowed."))
+		helpers.Failed(w)
 		return
 	}
 
@@ -204,6 +204,6 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	helpers.Failed(w, http.StatusNotFound, errors.New("Page not found."))
+	helpers.Failed(w)
 
 }

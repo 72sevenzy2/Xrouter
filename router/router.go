@@ -29,9 +29,8 @@ type Router struct {
 	*core.Router
 }
 
-type CRequest struct {
-	*core.Request
-}
+// type aliases core/types.go
+type Request = core.Request
 
 // Use func to use the middewares (also appending it to the Middlewares type in router struct
 func (r *Router) Use(s core.Middleware) { // global

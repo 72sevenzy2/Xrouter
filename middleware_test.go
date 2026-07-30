@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/72sevenzy2/http-router/router"
-	"github.com/72sevenzy2/http-router/core"
 )
 
 // auth testing
@@ -23,7 +22,7 @@ func TestBasicAuth(t *testing.T) {
 	// 	w.WriteHeader(http.StatusOK)
 	// })
 
-	b.Handle(http.MethodGet, "/foo1", func(w http.ResponseWriter, r *core.Request) {
+	b.Handle(http.MethodGet, "/foo1", func(w http.ResponseWriter, r *router.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
@@ -45,7 +44,7 @@ func TestBearerAuth(t *testing.T) {
 
 	b.Use(router.BearerAuth("bearerauth123"))
 
-	b.Handle(http.MethodGet, "/foo2", func(w http.ResponseWriter, r *core.Request) {
+	b.Handle(http.MethodGet, "/foo2", func(w http.ResponseWriter, r *router.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
@@ -68,7 +67,7 @@ func TestBearerAuth(t *testing.T) {
 func TestLoggerNext(t *testing.T) {
 	called := false
 
-	next := func(w http.ResponseWriter, r *core.Request) {
+	next := func(w http.ResponseWriter, r *router.Request) {
 		called = true
 		w.WriteHeader(http.StatusOK)
 	}
@@ -76,7 +75,7 @@ func TestLoggerNext(t *testing.T) {
 	handler := router.Logger(1024)(next)
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader("test"))
 	rr := httptest.NewRecorder()
-	routerReq := &core.Request{Request: req}
+	routerReq := &router.Request{Request: req}
 
 	handler(rr, routerReq)
 
@@ -92,7 +91,7 @@ func TestLoggerNext(t *testing.T) {
 
 // test to make sure logger preserves data (body)
 func TestLoggerBody(t *testing.T) {
-	next := func(w http.ResponseWriter, r *core.Request) {
+	next := func(w http.ResponseWriter, r *router.Request) {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			t.Fatal(err)
@@ -107,7 +106,7 @@ func TestLoggerBody(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader("testC"))
 	rr := httptest.NewRecorder()
-	routerReq := &core.Request{Request: req}
+	routerReq := &router.Request{Request: req}
 
 	handler(rr, routerReq)
 }

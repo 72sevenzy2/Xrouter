@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/72sevenzy2/http-router/router"
+	"github.com/72sevenzy2/http-router/core"
 )
 
 func TestStandardGrouping(t *testing.T) {
@@ -13,7 +14,7 @@ func TestStandardGrouping(t *testing.T) {
 
 	api := b.Group("/test")
 
-	api.Handle(http.MethodGet, "/test2", func(w http.ResponseWriter, r *router.Request) {
+	api.Handle(http.MethodGet, "/test2", func(w http.ResponseWriter, r *core.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
@@ -35,7 +36,7 @@ func TestInlineNests(t *testing.T) {
 
 	api := b.Group("/test", "/r1", "/2")
 
-	api.Handle(http.MethodGet, "/testr", func(w http.ResponseWriter, r *router.Request) {
+	api.Handle(http.MethodGet, "/testr", func(w http.ResponseWriter, r *core.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
@@ -62,7 +63,7 @@ func TestNestedGroups(t *testing.T) {
 	v2 := v1.Group("/child2")
 	v2.Use(router.Recoverer())
 
-	v2.Handle(http.MethodGet, "/testchild", func(w http.ResponseWriter, r *router.Request) {
+	v2.Handle(http.MethodGet, "/testchild", func(w http.ResponseWriter, r *core.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 

@@ -1,7 +1,6 @@
 package router
 
 import (
-	"bytes"
 	"strings"
 )
 
@@ -46,26 +45,7 @@ func match(routeP []string, reqP []string) (bool, map[string]string) {
 	return true, params
 }
 
-// custom limited writer function for Logger() to limit body size reading.
-type LimitedBuffer struct {
-	buf   *bytes.Buffer
-	limit uint32
-}
 
-// custom write func for LimitedBuffer, (allocates new slice based on truncated size on original slice)
-func (l *LimitedBuffer) Write(p []byte) (int, error) {
-	remaining := l.limit - uint32(l.buf.Len())
-
-	if remaining <= 0 {
-		return len(p), nil
-	}
-
-	if len(p) > int(remaining) { // check if []byte that is being written to l.buf exceeds remaining.
-		p = p[:remaining] // truncate
-	}
-
-	return l.buf.Write(p)
-}
 
 // path joining helper (for Grouping)
 func Join(p1, p2 string) string {

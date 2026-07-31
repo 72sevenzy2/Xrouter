@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/72sevenzy2/http-router/router"
+	mw "github.com/72sevenzy2/Xrouter-middlewares"
 )
 
 // auth testing
@@ -16,7 +17,7 @@ func TestBasicAuth(t *testing.T) {
 	b := router.NewRouter()
 
 	// apply auth middleware
-	b.Use(router.BasicAuth("user1", "pass1"))
+	b.Use(mw.BasicAuth("user1", "pass1"))
 
 	// b.Handle(http.MethodGet, "/foo1", func(w http.ResponseWriter, r *http.Request) {
 	// 	w.WriteHeader(http.StatusOK)
@@ -42,7 +43,7 @@ func TestBasicAuth(t *testing.T) {
 func TestBearerAuth(t *testing.T) {
 	b := router.NewRouter()
 
-	b.Use(router.BearerAuth("bearerauth123"))
+	b.Use(mw.BearerAuth("bearerauth123"))
 
 	b.Handle(http.MethodGet, "/foo2", func(w http.ResponseWriter, r *router.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -72,7 +73,7 @@ func TestLoggerNext(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}
 
-	handler := router.Logger(1024)(next)
+	handler := mw.Logger(1024)(next)
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader("test"))
 	rr := httptest.NewRecorder()
 	routerReq := &router.Request{Request: req}
@@ -102,7 +103,7 @@ func TestLoggerBody(t *testing.T) {
 		}
 	}
 
-	handler := router.Logger(1024)(next)
+	handler := mw.Logger(1024)(next)
 
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader("testC"))
 	rr := httptest.NewRecorder()

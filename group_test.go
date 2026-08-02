@@ -5,9 +5,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	mw "github.com/72sevenzy2/Xrouter-middlewares"
-
-
 	"github.com/72sevenzy2/http-router/router"
 )
 
@@ -60,10 +57,10 @@ func TestNestedGroups(t *testing.T) {
 	api := b.Group("/parent")
 
 	v1 := api.Group("/child1")
-	v1.Use(mw.Logger(0))
+	v1.Use(router.Logger(0))
 
 	v2 := v1.Group("/child2")
-	v2.Use(mw.Recoverer())
+	v2.Use(router.Recoverer())
 
 	v2.Handle(http.MethodGet, "/testchild", func(w http.ResponseWriter, r *router.Request) {
 		w.WriteHeader(http.StatusOK)

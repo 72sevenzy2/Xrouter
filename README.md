@@ -4,12 +4,12 @@
 # key features:
 
 - Route grouping for nested routes.
-- No external dependencies used, other than a tool (json-parser) i made to handle json responses which is used here.
+- No external dependencies used, other than Xrouter-middlewares, and json-parser which were made by me to handle json responses here.
 - Includes middleware such as basicAuth, BearerAuth, logging middleware, a timeout middleware, and a recovery middleware.
 - Route specific middleware(s) > supports middlewares for specific routes without applying globally to all the routes.
 - Supports route parameters > routes can have dynamic parameters for example, "/:id", although this feature can be slower than chi/gin as the implementation involves looping over routes to check if its dynamic. But for non-dynamic routes (without parameters), this router uses a simple map to store all routes without looping over them which is faster.
 
-Its also important to note that when handling dynamic routes, the route parameters are stored in a custom Request struct map field (params) in a map, so you can retrieve a particular field in that map via r.params, An example will be shown below:
+Its also important to note that when handling dynamic routes, the route parameters are stored in a custom Request struct map field (params) in a map, so you can retrieve a particular field in that map via r.params, example:
 
 ```
  package main
@@ -40,7 +40,7 @@ func main() {
 
 ```
 <br>
-<h4 align="center">(when writing handlers, do make sure your using the custom Request struct instead of http.Request), which is router.Request</h4>
+<h4 align="center">note: when writing handlers, do make sure your using the custom Request struct instead of http.Request, which is router.Request</h4>
 
 <h1 align="center">General usage:</h1>
 

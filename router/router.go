@@ -18,6 +18,7 @@ package router
 
 import (
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/72sevenzy2/http-router/core"
@@ -111,7 +112,7 @@ func (r *Router) Handle(method string, path string, handler core.HandlerFunc, mw
 
 	if len(mws) > 0 {
 		// applying route specific middleware in reverse order
-		for i := len(mws) - 1; i >= 0; i-- {
+		for i := range slices.Backward(mws) {
 			handler = mws[i](handler) // add handler to mw
 		}
 	}

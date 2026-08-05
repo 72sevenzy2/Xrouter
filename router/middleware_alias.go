@@ -1,15 +1,17 @@
 package router
 
 import (
-	"github.com/72sevenzy2/http-router/core"
+	"slices"
+
 	mw "github.com/72sevenzy2/Xrouter-middlewares"
+	"github.com/72sevenzy2/http-router/core"
 )
 
-// todo: add middlewares as variables wrapped from middleware/...
+// later: alias rate limiting mw
 
 // middleware chaining.
 func (r *Router) ApplyMiddlewares(h core.HandlerFunc) core.HandlerFunc {
-	for i := len(r.Middlewares) - 1; i >= 0; i-- {
+	for i := range slices.Backward(r.Middlewares) {
 		h = r.Middlewares[i](h)
 	}
 

@@ -7,8 +7,10 @@ import (
 	"github.com/72sevenzy2/http-router/core"
 )
 
-// Limiter holds the NewLimiter() method in which is for initialising the struct, and RateLimiter() method in which is the middleware.
-type Limiter = mw.Limiter 
+// NewLimiter is a method of the Limiter struct, in which also holds the RateLimiter which is the middleware.
+func NewLimiter(limit int, ref int) *mw.Limiter {
+	return mw.NewLimiter(limit, ref)
+}
 
 // middleware chaining.
 func (r *Router) ApplyMiddlewares(h core.HandlerFunc) core.HandlerFunc {

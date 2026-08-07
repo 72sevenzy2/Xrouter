@@ -7,7 +7,8 @@ import (
 	"github.com/72sevenzy2/http-router/core"
 )
 
-// later: alias rate limiting mw
+// Limiter holds the NewLimiter() method in which is for initialising the struct, and RateLimiter() method in which is the middleware.
+type Limiter = mw.Limiter 
 
 // middleware chaining.
 func (r *Router) ApplyMiddlewares(h core.HandlerFunc) core.HandlerFunc {

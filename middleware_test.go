@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/72sevenzy2/http-router/router"
@@ -109,4 +110,40 @@ func TestLoggerBody(t *testing.T) {
 	routerReq := &router.Request{Request: req}
 
 	handler(rr, routerReq)
+}
+
+// rate limiting test
+func TestRateLimiter(t *testing.T) {
+	b := router.NewRouter()
+
+	lim := router.NewLimiter(100, 1) // 100 requests cap, 1 token refill per second
+
+	b.Use(lim.RateLimiter())
+
+	var recs int
+	var mu sync.Mutex
+
+	b.Handle(http.MethodGet, "/rateLimTest", func(w http.ResponseWriter, r *router.Request) {
+		mu.Lock()
+		recs++
+		mu.Unlock()
+
+		w.WriteHeader(http.StatusOK)
+	})
+
+	var wg sync.WaitGroup
+	for range 100 { // 100 concurrent reqs
+		defer wg.Add(1)
+
+		go func() {
+			req := httptest.NewRequest(http.MethodGet, "/rateLimTest", nil)
+			rr := httptest.NewRecorder()
+
+			b.ServeHTTP(rr, req)
+		}()
+	}
+	wg.Wait()
+
+	t.Log("requests received: ", recs)
+
 }

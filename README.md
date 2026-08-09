@@ -4,6 +4,7 @@
 # key features:
 
 - Route grouping for nested routes.
+- Built-in rate-limiter for API safety, in which utilises a token-bucket which refills by given amount of seconds via the NewLimiter() constructer.
 - No external dependencies used, other than Xrouter-middlewares, and json-parser which were made by me to handle json responses here.
 - Includes middleware such as basicAuth, BearerAuth, logging middleware, a timeout middleware, and a recovery middleware.
 - Route specific middleware(s) > supports middlewares for specific routes without applying globally to all the routes.
@@ -126,6 +127,10 @@ import (
 func main() {
 	r := router.NewRouter()
 
+	limiter := router.NewLimiter(100, 1) // NewLimiter() takes in a maximum number of requests, and how often each token is refilled for      // the client.
+
+	r.Use(limiter.RateLimiter())
+	
 	r.Use(router.Recoverer()) // recoverer middleware always goes first, prevents server crashes when a bug has occured.
 	r.Use(router.Logger(0)) // standard logging, in which param 0 indicates default body size logging.
 
@@ -147,26 +152,6 @@ func main() {
 ```
 ^ you can limit how much the logging middleware reads from the request body, the default size set is 1kb, but you can change it via passing in an int in the Logger() func, an example: "r.Use(router.Logger(1024 * 2)" (limit to 2 kilobytes.) but make sure the size your going to configure is of appropriate type (uint32).
 <br>
-
-while using the timeout middleware it is also important to note that whilst using it as so, your handler would also need to explicitly coorporate with the middleware inorder for the request to cancel after a given time, so example:
-
-```
-package handler
-
-import (
-	"context"
-)
-
-func SlowHiHandler(w http.ResponseWriter, r *http.Request) {
-	select {
-	case <-time.After(5 * time.Second):
-		// continue with task before cancellation
-
-	case <-r.Context().Done():
-		return // cancel
-	}
-}
-```
 
 <br>
 <h2 align="center">Example usage with route-specific middleware:</h2>
@@ -194,4 +179,25 @@ func main() {
 	}
 }
 
+```
+<br>
+
+while using the timeout middleware it is also important to note that whilst using it as so, your handler would also need to explicitly coorporate with the middleware inorder for the request to cancel after a given time, so example:
+
+```
+package handler
+
+import (
+	"context"
+)
+
+func SlowHiHandler(w http.ResponseWriter, r *http.Request) {
+	select {
+	case <-time.After(5 * time.Second):
+		// continue with task before cancellation
+
+	case <-r.Context().Done():
+		return // cancel
+	}
+}
 ```

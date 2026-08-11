@@ -38,64 +38,6 @@ func (r *Router) Use(s core.Middleware) { // global
 	r.Middlewares = append(r.Middlewares, s)
 }
 
-// group type (for route grouping)
-type Group struct {
-	router *Router
-	prefix string
-	mws    []core.Middleware
-}
-
-// the router Group() method works such that when it is registered, child routes can also be registered using the parent route as it would be of type *Group, in which the child route would also inherit the parent routes middlewares.
-// parent group method
-func (r *Router) Group(p string, nests ...string) *Group {
-	var updPath string
-	updPath = p
-
-	// make sure "/" is included in str
-	if string(p[0]) != "/" {
-		updPath = "/" + p
-	}
-
-	if len(nests) != 0 {
-		// updPath = Join(updPath, nests[])
-		for i := range nests {
-			updPath = Join(updPath, nests[i])
-		}
-	}
-
-	return &Group{
-		router: r,
-		prefix: updPath,
-	}
-}
-
-// Group based middleware
-func (g *Group) Use(s core.Middleware) {
-	g.mws = append(g.mws, s)
-}
-
-// group method for child routes
-func (g *Group) Group(prefix string) *Group {
-	cmws := append([]core.Middleware{}, g.mws...) // copy previous route nodes mw collection (each childing having their own mw slice to do so)
-
-	return &Group{
-		router: g.router,
-		prefix: Join(g.prefix, prefix),
-		mws:    cmws,
-	}
-}
-
-// Handler func for grouped routes.
-func (g *Group) Handle(method, path string, handler core.HandlerFunc, mws ...core.Middleware) {
-
-	newPath := Join(g.prefix, path) // path included with parent route
-
-	mw := append([]core.Middleware{}, g.mws...) // appending empty Middleware slice, and storing g.mws  (group based middleware)
-	mw = append(mw, mws...)                     // appending route specific middleware
-
-	g.router.Handle(method, newPath, handler, mw...)
-}
-
 // initialise a new router.
 func NewRouter() *Router {
 	// contructing the router upon the func being called

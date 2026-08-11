@@ -23,7 +23,7 @@ func TestBasicAuth(t *testing.T) {
 	// 	w.WriteHeader(http.StatusOK)
 	// })
 
-	b.Handle(http.MethodGet, "/foo1", func(w http.ResponseWriter, r *router.Request) {
+	b.Get("/foo1", func(w http.ResponseWriter, r *router.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
@@ -45,7 +45,7 @@ func TestBearerAuth(t *testing.T) {
 
 	b.Use(router.BearerAuth("bearerauth123"))
 
-	b.Handle(http.MethodGet, "/foo2", func(w http.ResponseWriter, r *router.Request) {
+	b.Get("/foo2", func(w http.ResponseWriter, r *router.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
@@ -123,7 +123,7 @@ func TestRateLimiter(t *testing.T) {
 	var recs int
 	var mu sync.Mutex
 
-	b.Handle(http.MethodGet, "/rateLimTest", func(w http.ResponseWriter, r *router.Request) {
+	b.Get("/rateLimTest", func(w http.ResponseWriter, r *router.Request) {
 		mu.Lock()
 		recs++
 		mu.Unlock()

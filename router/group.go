@@ -50,7 +50,7 @@ func (g *Group) Group(prefix string) *Group {
 		mws:    cmws,
 	}
 }
-// todo: add method-specific handler methods and update tests.
+
 // Handler func for grouped routes (for method-specific handlers in group_handlers.go)
 func (g *Group) Handle(method, path string, handler core.HandlerFunc, mws ...core.Middleware) {
 

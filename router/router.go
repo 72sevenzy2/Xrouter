@@ -49,7 +49,7 @@ func NewRouter() *Router {
 	} // which is just: "PATH": "...": "METHOD": ... (method can be either get, post, put, etc)
 }
 
-// adding routes, and assigning the method of the route aswell as the url to the handler which then is executed in the ServeHTTP func
+// initial handler, (mainly for handlers.go)
 func (r *Router) Handle(method string, path string, handler core.HandlerFunc, mws ...core.Middleware) {
 
 	if len(mws) > 0 {

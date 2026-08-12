@@ -3,14 +3,14 @@
 
 # key features:
 
+- Method handlers for every http method.
 - Route grouping for nested routes.
-- Built-in rate-limiter for API safety, in which utilises a token-bucket which refills by given amount of seconds via the NewLimiter() constructer.
-- No external dependencies used, other than Xrouter-middlewares, and json-parser which were made by me to handle json responses here.
-- Includes middleware such as basicAuth, BearerAuth, logging middleware, a timeout middleware, and a recovery middleware.
-- Route specific middleware(s) > supports middlewares for specific routes without applying globally to all the routes.
-- Supports route parameters > routes can have dynamic parameters for example, "/:id", although this feature can be slower than chi/gin as the implementation involves looping over routes to check if its dynamic. But for non-dynamic routes (without parameters), this router uses a simple map to store all routes without looping over them which is faster.
+- Built in rate limiting middleware.
+- No external dependencies (excluding ones made for Xrouter).
+- Supports middleware aswell as route specific middleware.
+- Supports dynamic routes.
 
-Its also important to note that when handling dynamic routes, the route parameters are stored in a custom Request struct map field (params) in a map, so you can retrieve a particular field in that map via r.params, example:
+Its also important to note that when handling dynamic routes, the route parameters are stored in a custom Request struct map field (params) in a map, to be retrieved from a particular field in that map via r.params, example:
 
 ```
  package main
@@ -25,7 +25,7 @@ import (
 func main() {
 	r := router.NewRouter()
 
-	r.Handle(http.MethodGet, "/user/:64", func(w http.ResponseWriter, r *router.Request) {
+	r.Get("/user/:64", func(w http.ResponseWriter, r *router.Request) {
 		HandleThisFunc()...
 		param, ok := r.params["user"]
 		if !ok {
@@ -58,7 +58,7 @@ import (
 func main() {
 	r := router.NewRouter()
 
-	r.Handle(http.MethodGet, "/resp", func(w http.ResponseWriter, r *router.Request) {
+	r.Get("/resp", func(w http.ResponseWriter, r *router.Request) {
 		w.Write([]byte("responded"))
 	})
 
@@ -94,12 +94,12 @@ func main() {
 	*/
 
 	v1 := api.Group("/child1")
-	v1.Use(router.Logger(0)) // can utilise middleware along with nested routes
+	v1.Use(router.Logger(0)) // you can use middleware with specific route inside nested routes.
 
 	v2 := v1.Group("/child2")
 	v2.Use(router.BasicAuth("username", "password")) // would indicate only this route having this middleware
 
-	v2.Handle(http.MethodGet, "/test", func(w http.ResponseWriter, r *router.Request) {
+	v2.Get("/test", func(w http.ResponseWriter, r *router.Request) {
 		w.Write([]byte("pong"))
 	})
 
@@ -139,7 +139,7 @@ func main() {
 	r.Use(router.Timeout(5)) // can be any time (its in seconds) depending on how long you want the time limit on every request.
 	// the Timeout mw is used for prevent slow requests by setting a timeout in which the request should last.
 
-	r.Handle(http.MethodGet, "/resp", func(w http.ResponseWriter, r *router.Request) {
+	r.Get("/resp", func(w http.ResponseWriter, r *router.Request) {
 		w.Write([]byte("responded"))
 	})
 
@@ -169,7 +169,7 @@ import (
 func main() {
 	r := router.NewRouter()
 
-	r.Handle(http.MethodGet, "/greet", func(w http.ResponseWriter, r *router.Request) {
+	r.Get("/greet", func(w http.ResponseWriter, r *router.Request) {
 		w.Write([]byte("hello"))
 	}, router.Recoverer(), router.Logger(0)) // you can do route-specific middleware(s) like this (can be 1 or many).
 

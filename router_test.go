@@ -1,4 +1,4 @@
-package entity
+package main
 
 import (
 	"encoding/json"
@@ -6,6 +6,11 @@ import (
 
 	"github.com/72sevenzy2/json-parser/helpers"
 )
+
+type Entity struct {
+	User string `json:"user"`
+	Id   int    `json:"id"`
+}
 
 func HiHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

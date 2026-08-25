@@ -14,7 +14,6 @@ func TestRouter(t *testing.T) {
 	b.Handle(http.MethodGet, "/test/", func(w http.ResponseWriter, r *router.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
-
 	rec := httptest.NewRecorder()
 	rr := httptest.NewRequest(http.MethodGet, "/test", nil)
 

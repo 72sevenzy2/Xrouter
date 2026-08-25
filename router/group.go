@@ -1,6 +1,9 @@
 package router
 
 import (
+	"net/http"
+	"strings"
+
 	"github.com/72sevenzy2/http-router/core"
 )
 
@@ -16,15 +19,13 @@ type Group struct {
 func (r *Router) Group(p string, nests ...string) *Group {
 	var updPath string
 	updPath = p
-
 	// make sure "/" is included in str
 	if string(p[0]) != "/" {
 		updPath = "/" + p
 	}
-
-	if len(nests) != 0 {
-		// updPath = Join(updPath, nests[])
+	if len(nests) > 0 {
 		for i := range nests {
+			// Join() normalises each nests before assigning to updPath.
 			updPath = Join(updPath, nests[i])
 		}
 	}
@@ -53,13 +54,14 @@ func (g *Group) Group(prefix string) *Group {
 
 // Handler func for grouped routes (for method-specific handlers in group_handlers.go)
 func (g *Group) Handle(method, path string, handler core.HandlerFunc, mws ...core.Middleware) {
-
-	newPath := Join(g.prefix, path) // path included with parent route
+	if !IsValidHTTPMethod(method) {
+		method = http.MethodGet // default to GET if invalid method.
+	}
+	normalisedpath := strings.TrimRight(path, "/")
+	newPath := Join(g.prefix, normalisedpath) // path included as child route with parent route.
 
 	mw := append([]core.Middleware{}, g.mws...) // appending empty Middleware slice, and storing g.mws  (group based middleware)
 	mw = append(mw, mws...)                     // appending route specific middleware
 
 	g.router.Handle(method, newPath, handler, mw...)
 }
-
-

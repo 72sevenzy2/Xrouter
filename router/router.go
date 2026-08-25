@@ -33,6 +33,7 @@ type Router struct {
 
 // type aliases core/types.go
 type Request = core.Request
+type HandlerFunc = core.HandlerFunc
 
 // Use func to use the middewares (also appending it to the Middlewares type in router struct
 func (r *Router) Use(s core.Middleware) { // global
@@ -51,7 +52,10 @@ func NewRouter() *Router {
 }
 
 // initial handler, (mainly for handlers.go)
-func (r *Router) Handle(method string, path string, handler core.HandlerFunc, mws ...core.Middleware) {
+func (r *Router) Handle(method string, path string, handler HandlerFunc, mws ...core.Middleware) {
+	if !IsValidHTTPMethod(method) {
+		method = http.MethodGet // default to GET
+	}
 
 	if len(mws) > 0 {
 		// applying route specific middleware in reverse order
@@ -69,12 +73,14 @@ func (r *Router) Handle(method string, path string, handler core.HandlerFunc, mw
 		return
 	}
 
+	normalisedpath := strings.TrimRight(path, "/") // exlcudes trailing slashes at the end of each path.
+
 	// otherwise use static route logic
-	if r.StaticRoutes[path] == nil { // check if route already exists before creating
-		r.StaticRoutes[path] = make(map[string]core.HandlerFunc)
+	if r.StaticRoutes[normalisedpath] == nil { // check if route already exists before creating
+		r.StaticRoutes[normalisedpath] = make(map[string]core.HandlerFunc)
 	}
 
-	r.StaticRoutes[path][method] = handler // assign both static route path and method to handler
+	r.StaticRoutes[normalisedpath][method] = handler // assign both static route path and method to handler
 }
 
 // routing logic
@@ -86,8 +92,8 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		path = "/" // default to / if empty
 	}
 
+	// Handler acts as the final handler after static/dynamic determining loops.
 	var Handler core.HandlerFunc
-
 	// attempt static routes (lower time complexity compared to dynamicRoutes which requires looping over routes (O(n)))
 	if methods, ok := s.StaticRoutes[path]; ok { // validate if route path exists
 		if handler, ok := methods[r.Method]; ok { // also check if method for route path is appropriate
@@ -120,8 +126,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	finalHandler := Handler
-	finalHandler(w, &core.Request{
+	Handler(w, &core.Request{
 		Request: r,
 		Params:  storedParams,
 	})

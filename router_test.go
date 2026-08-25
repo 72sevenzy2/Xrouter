@@ -1,33 +1,26 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
+	"net/http/httptest"
+	"testing"
 
-	"github.com/72sevenzy2/json-parser/helpers"
+	"github.com/72sevenzy2/http-router/router"
 )
 
-type Entity struct {
-	User string `json:"user"`
-	Id   int    `json:"id"`
-}
+func TestRouter(t *testing.T) {
+	b := router.NewRouter()
 
-func HiHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var i Entity // initilising the entity
+	b.Handle(http.MethodGet, "/test/", func(w http.ResponseWriter, r *router.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
 
-		err := json.NewDecoder(r.Body).Decode(&i) // decoding the body to get the data we want
-		if err != nil {                           // if there is no data which we needed in the body, throw an json error msg
-			helpers.Failed(w)
-			return
-		}
-		// respond with json returning the users user and the users id
-		v, err := json.Marshal(i)
-		if err != nil {
-			helpers.Failed(w)
-			return
-		}
-	
-		helpers.Ok(w, v)
+	rec := httptest.NewRecorder()
+	rr := httptest.NewRequest(http.MethodGet, "/test", nil)
+
+	b.ServeHTTP(rec, rr)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, rec.Code)
 	}
 }

@@ -23,6 +23,7 @@ import (
 
 	"github.com/72sevenzy2/http-router/core"
 	"github.com/72sevenzy2/json-parser/helpers"
+	"github.com/72sevenzy2/json-parser/response"
 )
 
 // Router struct to hold all static/dynamic routes
@@ -80,10 +81,13 @@ func (r *Router) Handle(method string, path string, handler core.HandlerFunc, mw
 func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// making all routes normalised without a / at the end, but with root /.
 	// for example. Input: "/users//" output: "/users", input: "users/1" output: "/users/1"
-	path := strings.TrimRight(r.URL.Path, "/")
-	if path == "" {
+	path := ""
+
+	// fast path if URL.Path were to be empty
+	if path = strings.TrimRight(r.URL.Path, "/"); path == "" {
 		path = "/"
 	}
+	path = strings.TrimRight(r.URL.Path, "/")
 
 	// attempt static routes (lower time complexity compared to dynamicRoutes which requires looping over routes (O(n)))
 	if methods, ok := s.StaticRoutes[path]; ok { // validate if route path exists
@@ -107,9 +111,14 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	for _, route := range s.DynamicRoutes[r.Method] { // loop over dynamic routes which are grouped by methods
 
-		ok, params := match(route.Parts, parts)
-		if !ok {
-			continue // skip current iteration
+		params, err := match(route.Parts, parts)
+		if err != nil {
+			response.JSON(w, response.WithError(err.Error()), response.WithStatus(http.StatusBadRequest))
+			return
+		}
+
+		if params == nil {
+			continue // if no params were stored
 		}
 
 		final := s.ApplyMiddlewares(route.Handler)
@@ -122,5 +131,4 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	helpers.Failed(w)
-
 }

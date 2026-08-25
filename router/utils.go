@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -15,34 +16,35 @@ func splitPath(path string) []string {
 }
 
 // func to match request parts and route parts
-func match(routeP []string, reqP []string) (bool, map[string]string) {
-	// check if lengths match (if it isnt then it cannot be compared)
+func match(routeP []string, reqP []string) (map[string]string, error) {
+
+	// verify if incoming requests path and if registered route match.
 	if len(routeP) != len(reqP) {
-		return false, nil
+		return nil, fmt.Errorf("route path and request path do not match: %d, %d", len(routeP), len(reqP))
 	}
 
-	params := make(map[string]string, 500) // preallocate number of params
+	params := make(map[string]string)
 
 	for v := range routeP { // can use both reqP and routeP to loop over
 		rp := routeP[v]
 		reqp := reqP[v]
 
-		if len(rp) > 0 && rp[0] == ':' { // if includes : then its a param, and checking whether its greater than 0 prevents crashes for when if it is an empty string.
-			key := rp[1:]      // removes the :
-			params[key] = reqp //
+		if len(rp) > 0 && rp[0] == ':' { // validate whether route part contains an : (indicating that it is dynamic)
+			key := rp[1:]
+			params[key] = reqp // store dynamic route indicator as param to reqp value.
 			continue           // continue to next loop iteration
 		}
 
-		// otherwise, if not a param then reject
+		//
 		if rp != reqp {
-			return false, nil
+			return nil, fmt.Errorf("Request does not match Route path, found: %s", rp)
 		}
 	}
 
 	//
 
 	// everything matched
-	return true, params
+	return params, nil
 }
 
 

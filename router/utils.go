@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 )
 
@@ -47,8 +48,6 @@ func match(routeP []string, reqP []string) (map[string]string, error) {
 	return params, nil
 }
 
-
-
 // path joining helper (for Grouping)
 func Join(p1, p2 string) string {
 	switch {
@@ -58,5 +57,24 @@ func Join(p1, p2 string) string {
 		return strings.TrimRight(p1, "/") + "/"
 	default:
 		return strings.TrimRight(p1, "/") + "/" + strings.TrimLeft(p2, "/")
+	}
+}
+
+// IsValidHTTPMethod determines whether a given method via router.Handle() or router.Group.Handle() is an valid http method.
+func IsValidHTTPMethod(m string) bool {
+	switch m {
+	case http.MethodDelete,
+		http.MethodGet,
+		http.MethodConnect,
+		http.MethodHead,
+		http.MethodOptions,
+		http.MethodPatch,
+		http.MethodPost,
+		http.MethodPut,
+		http.MethodTrace:
+		return true
+
+	default:
+		return false
 	}
 }

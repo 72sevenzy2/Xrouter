@@ -81,54 +81,48 @@ func (r *Router) Handle(method string, path string, handler core.HandlerFunc, mw
 func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// making all routes normalised without a / at the end, but with root /.
 	// for example. Input: "/users//" output: "/users", input: "users/1" output: "/users/1"
-	path := ""
-
-	// fast path if URL.Path were to be empty
-	if path = strings.TrimRight(r.URL.Path, "/"); path == "" {
-		path = "/"
+	path := strings.TrimRight(r.URL.Path, "/")
+	if path == "/" {
+		path = "/" // default to / if empty
 	}
-	path = strings.TrimRight(r.URL.Path, "/")
+
+	var Handler core.HandlerFunc
 
 	// attempt static routes (lower time complexity compared to dynamicRoutes which requires looping over routes (O(n)))
 	if methods, ok := s.StaticRoutes[path]; ok { // validate if route path exists
 		if handler, ok := methods[r.Method]; ok { // also check if method for route path is appropriate
-			finalHandler := s.ApplyMiddlewares(handler) // apply middlewares if included
-			finalHandler(w, &core.Request{
-				Request:    r,
-				ContextReq: r,
-			}) // run handler
+			Handler = handler
+		} else {
+			// otherwise return err if method is invalid
+			helpers.Failed(w)
 			return
 		}
-
-		// otherwise return err if method is invalid
-		helpers.Failed(w)
-		return
 	}
-
 	// attempt dynamic routes (higher time complexity than staticRoutes (which are O(1)))
-
 	parts := splitPath(path)
+	var storedParams map[string]string
+	var storedParamsErr error
 
 	for _, route := range s.DynamicRoutes[r.Method] { // loop over dynamic routes which are grouped by methods
-
-		params, err := match(route.Parts, parts)
-		if err != nil {
-			response.JSON(w, response.WithError(err.Error()), response.WithStatus(http.StatusBadRequest))
+		storedParams, storedParamsErr = match(route.Parts, parts)
+		if storedParamsErr != nil {
+			response.JSON(w, response.WithError(storedParamsErr.Error()), response.WithStatus(http.StatusBadRequest))
 			return
 		}
-
-		if params == nil {
+		if storedParams == nil {
 			continue // if no params were stored
 		}
+		Handler = route.Handler
+	}
 
-		final := s.ApplyMiddlewares(route.Handler)
-		final(w, &core.Request{ // store params
-			Request: r,
-
-			Params: params,
-		})
+	if Handler == nil {
+		response.JSON(w, response.WithStatus(http.StatusBadRequest), response.WithError(http.StatusText(http.StatusBadRequest)))
 		return
 	}
 
-	helpers.Failed(w)
+	finalHandler := Handler
+	finalHandler(w, &core.Request{
+		Request: r,
+		Params:  storedParams,
+	})
 }

@@ -4,7 +4,7 @@
 # Features:
 
 - Route grouping for nested routes.
-- Built in rate limiting middleware.
+- RFC-Compliancy.
 - No external dependencies (excluding ones made for Xrouter).
 - Supports middleware aswell as route specific middleware handling.
 - Supports dynamic routes.
@@ -135,8 +135,7 @@ func main() {
 
 	r.Use(router.BearerAuth("secretKey")) // can be any token (which has to be a string),
 	r.Use(router.BasicAuth("user1", "password1234")) // parameters username and password need to be included when using.
-	r.Use(router.Timeout(5)) // can be any time (its in seconds) depending on how long you want the time limit on every request.
-	// the Timeout mw is used for prevent slow requests by setting a timeout in which the request should last.
+	r.Use(router.Timeout(time.Second * 10)) //  depending on how long you want the time limit on every request.
 
 	r.Get("/resp", func(w http.ResponseWriter, r *router.Request) {
 		w.Write([]byte("responded"))
@@ -181,18 +180,19 @@ func main() {
 ```
 <br>
 
-while using the timeout middleware it is also important to note that whilst using it as so, your handler would also need to explicitly coorporate with the middleware inorder for the request to cancel after a given time, so example:
+whilst using the timeout middleware, in your handler you must exit when the cancellation deadline ends as such:
 
 ```
 package handler
 
 import (
-	"context"
+	"github.com/72sevenzy2/Xrouter"
 )
 
-func SlowHiHandler(w http.ResponseWriter, r *http.Request) {
+
+func SlowHiHandler(w http.ResponseWriter, r *router.Request) {
 	select {
-	case <-time.After(5 * time.Second):
+	case <-time.After(5 * time.Second): // The duration you set in the Timeout() mw or less.
 		// continue with task before cancellation
 
 	case <-r.Context().Done():

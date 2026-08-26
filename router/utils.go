@@ -24,7 +24,9 @@ func match(routeP []string, reqP []string) (map[string]string, error) {
 		return nil, fmt.Errorf("route path and request path do not match: %d, %d", len(routeP), len(reqP))
 	}
 
-	params := make(map[string]string)
+	// preallocated map to store params of size len(route.Parts).
+	// as number of params would vary on number of params in routeP, though it is safe to keep allocated size of len(routeP) for flexibility depending on number of parameters in a single route.
+	params := make(map[string]string, len(routeP))
 
 	for v := range routeP { // can use both reqP and routeP to loop over
 		rp := routeP[v]
@@ -36,7 +38,8 @@ func match(routeP []string, reqP []string) (map[string]string, error) {
 			continue           // continue to next loop iteration
 		}
 
-		//
+		// verifies whether request path matches registered route path
+		// for RFC-3986 compliancy, it states that query, path components must be treated case-sensitive, so we dont normalise them here.
 		if rp != reqp {
 			return nil, fmt.Errorf("Request does not match Route path, found: %s", rp)
 		}

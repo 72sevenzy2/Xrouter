@@ -94,7 +94,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Handler acts as the final handler after static/dynamic determining loops.
 	var Handler core.HandlerFunc
-	// attempt static routes (lower time complexity compared to dynamicRoutes which requires looping over routes (O(n)))
+	// attempt static routes
 	if methods, ok := s.StaticRoutes[path]; ok { // validate if route path exists
 		if handler, ok := methods[r.Method]; ok { // also check if method for route path is appropriate
 			Handler = handler
@@ -104,14 +104,17 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	// attempt dynamic routes (higher time complexity than staticRoutes (which are O(1)))
+	// attempt dynamic routes
 	parts := splitPath(path)
-	var storedParams map[string]string
+
+	// preallocated storedParams for storing parameters, dependent on how many r.URL parts are present on splitPath().
+	storedParams := make(map[string]string, len(parts))
 	var storedParamsErr error
 
 	for _, route := range s.DynamicRoutes[r.Method] { // loop over dynamic routes which are grouped by methods
 		storedParams, storedParamsErr = match(route.Parts, parts)
 		if storedParamsErr != nil {
+			// request path does not match route path.
 			response.JSON(w, response.WithError(storedParamsErr.Error()), response.WithStatus(http.StatusBadRequest))
 			return
 		}
@@ -126,8 +129,15 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Handler(w, &core.Request{
-		Request: r,
-		Params:  storedParams,
-	})
+	if storedParams == nil {
+		Handler(w, &core.Request{
+			Request: r,
+			Params: nil,
+		})
+	} else {
+		Handler(w, &core.Request{
+			Request: r,
+			Params:  storedParams,
+		})
+	}
 }

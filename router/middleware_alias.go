@@ -2,6 +2,7 @@ package router
 
 import (
 	"slices"
+	"time"
 
 	mw "github.com/72sevenzy2/Xrouter-middlewares"
 	"github.com/72sevenzy2/http-router/core"
@@ -37,6 +38,6 @@ func Recoverer() core.Middleware {
 	return mw.Recoverer()
 }
 
-func Timeout(N int) core.Middleware {
+func Timeout(N time.Duration) core.Middleware {
 	return mw.Timeout(N)
 }

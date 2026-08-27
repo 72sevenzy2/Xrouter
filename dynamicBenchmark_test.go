@@ -9,6 +9,7 @@ import (
 )
 
 func BenchmarkDynamicRoutes(t *testing.B) {
+	t.ReportAllocs()
 	r := router.NewRouter()
 
 	r.Get("route/path-50/:id", func(w http.ResponseWriter, r *router.Request) {
@@ -26,6 +27,7 @@ func BenchmarkDynamicRoutes(t *testing.B) {
 
 // comparing to go's stdlib mux
 func BenchmarkStdlibDynamic(t *testing.B) {
+	t.ReportAllocs()
 	r := http.NewServeMux()
 
 	r.HandleFunc("route/path-50/:id", DummyHandler)

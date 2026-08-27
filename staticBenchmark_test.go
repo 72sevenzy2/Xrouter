@@ -9,6 +9,7 @@ import (
 )
 
 func BenchmarkStaticRoutes(t *testing.B) {
+	t.ReportAllocs()
 	r := router.NewRouter()
 
 	r.Get("test/path/hi", func(w http.ResponseWriter, r *router.Request) {
@@ -26,6 +27,7 @@ func BenchmarkStaticRoutes(t *testing.B) {
 }
 
 func BenchmarkStdlibStatic(t *testing.B) {
+	t.ReportAllocs()
 	r := http.NewServeMux()
 
 	r.HandleFunc("test/path/hi", DummyHandler)

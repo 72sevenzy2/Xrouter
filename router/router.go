@@ -53,8 +53,9 @@ func NewRouter() *Router {
 
 // initial handler, (mainly for handlers.go)
 func (r *Router) Handle(method string, path string, handler HandlerFunc, mws ...core.Middleware) {
+	// RFC 9110 States that http methods are explicitly case-sensitive so we should not default it here if it is invalid.
 	if !IsValidHTTPMethod(method) {
-		method = http.MethodGet // default to GET
+		panic("invalid http method.")
 	}
 
 	if len(mws) > 0 {
@@ -63,24 +64,34 @@ func (r *Router) Handle(method string, path string, handler HandlerFunc, mws ...
 			handler = mws[i](handler) // add handler to mw
 		}
 	}
+	normalisedpath := strings.TrimRight(path, "/") // normalise of any trailing slashes.
+	if normalisedpath == "" {
+		normalisedpath = "/"
+	}
+
 	// check if route is dynamic
-	if isDynamic(path) {
-		r.DynamicRoutes[method] = append(r.DynamicRoutes[method], core.Route{
-			Method:  method,
-			Parts:   splitPath(path),
-			Handler: handler,
-		})
+	if strings.Contains(normalisedpath, ":") { // fast path
+		if isDynamic(normalisedpath) {
+			r.DynamicRoutes[method] = append(r.DynamicRoutes[method], core.Route{
+				Method:  method,
+				Parts:   splitPath(normalisedpath),
+				Handler: handler,
+			})
+			return
+		}
+	}
+	staticR, ok := r.StaticRoutes[normalisedpath]
+	if !ok {
+		staticR = make(map[string]core.HandlerFunc)
+		r.StaticRoutes[normalisedpath] = staticR
+	}
+
+	if _, exists := staticR[method]; !exists {
+		staticR[method] = handler
 		return
 	}
 
-	normalisedpath := strings.TrimRight(path, "/") // exlcudes trailing slashes at the end of each path.
-
-	// otherwise use static route logic
-	if r.StaticRoutes[normalisedpath] == nil { // check if route already exists before creating
-		r.StaticRoutes[normalisedpath] = make(map[string]core.HandlerFunc)
-	}
-
-	r.StaticRoutes[normalisedpath][method] = handler // assign both static route path and method to handler
+	panic("path had been registered :" + path)
 }
 
 // routing logic
@@ -88,7 +99,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// making all routes normalised without a / at the end, but with root /.
 	// for example. Input: "/users//" output: "/users", input: "users/1" output: "/users/1"
 	path := strings.TrimRight(r.URL.Path, "/")
-	if path == "/" {
+	if path == "" {
 		path = "/" // default to / if empty
 	}
 
@@ -132,7 +143,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if storedParams == nil {
 		Handler(w, &core.Request{
 			Request: r,
-			Params: nil,
+			Params:  nil,
 		})
 	} else {
 		Handler(w, &core.Request{

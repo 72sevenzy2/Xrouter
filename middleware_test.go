@@ -133,13 +133,14 @@ func TestRateLimiter(t *testing.T) {
 
 	var wg sync.WaitGroup
 	for range 100 { // 100 concurrent reqs
-		defer wg.Add(1)
+		wg.Add(1)
 
 		go func() {
 			req := httptest.NewRequest(http.MethodGet, "/rateLimTest", nil)
 			rr := httptest.NewRecorder()
 
 			b.ServeHTTP(rr, req)
+			wg.Done()
 		}()
 	}
 	wg.Wait()

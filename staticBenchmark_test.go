@@ -11,7 +11,7 @@ import (
 func BenchmarkStaticRoutes(t *testing.B) {
 	r := router.NewRouter()
 
-	r.Handle(http.MethodGet, "test/path/hi", func(w http.ResponseWriter, r *router.Request) {
+	r.Get("test/path/hi", func(w http.ResponseWriter, r *router.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 

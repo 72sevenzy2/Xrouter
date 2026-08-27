@@ -11,7 +11,7 @@ import (
 func BenchmarkDynamicRoutes(t *testing.B) {
 	r := router.NewRouter()
 
-	r.Handle(http.MethodGet, "route/path-50/:id", func(w http.ResponseWriter, r *router.Request) {
+	r.Get("route/path-50/:id", func(w http.ResponseWriter, r *router.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 

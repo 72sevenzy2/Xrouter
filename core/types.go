@@ -6,15 +6,21 @@ import (
 	"net/http"
 )
 
+// Param is to store route parameters.
+type Param struct {
+	Key   string
+	Value string
+}
+type Params []*Param
+
 type Request struct { // shared
 	*http.Request
 	ContextReq *http.Request     // for timeout mw (WithContext() usage)
-	Params     map[string]string // holding route parameters
+	Params     Params // holding route parameters
 }
 
-
 type HandlerFunc func(http.ResponseWriter, *Request) // shared
-type Middleware func(HandlerFunc) HandlerFunc // the middleware type (takes in the current handler and returns a new one)
+type Middleware func(HandlerFunc) HandlerFunc        // the middleware type (takes in the current handler and returns a new one)
 
 // Route struct to loop over dynamic routes
 type Route struct {

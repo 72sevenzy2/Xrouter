@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"github.com/72sevenzy2/http-router/core"
 )
 
 // func to check whether route is dynamic or static
@@ -17,7 +18,7 @@ func splitPath(path string) []string {
 }
 
 // func to match request parts and route parts
-func match(routeP []string, reqP []string) (map[string]string, error) {
+func match(routeP []string, reqP []string) (core.Params, error) {
 
 	// verify if incoming requests path and if registered route match.
 	if len(routeP) != len(reqP) {
@@ -26,7 +27,10 @@ func match(routeP []string, reqP []string) (map[string]string, error) {
 
 	// preallocated map to store params of size len(route.Parts).
 	// as number of params would vary on number of params in routeP, though it is safe to keep allocated size of len(routeP) for flexibility depending on number of parameters in a single route.
-	params := make(map[string]string, len(routeP))
+	//params := make(map[string]string, len(routeP))
+
+	p := &core.Param{}
+	var params core.Params
 
 	for v := range routeP { // can use both reqP and routeP to loop over
 		rp := routeP[v]
@@ -34,8 +38,13 @@ func match(routeP []string, reqP []string) (map[string]string, error) {
 
 		if len(rp) > 0 && rp[0] == ':' { // validate whether route part contains an : (indicating that it is dynamic)
 			key := rp[1:]
-			params[key] = reqp // store dynamic route indicator as param to reqp value.
-			continue           // continue to next loop iteration
+			p = &core.Param{
+				Key:   key,
+				Value: reqp,
+			}
+			//params[key] = reqp // store dynamic route indicator as param to reqp value.
+			params = append(params, p)
+			continue // continue to next loop iteration
 		}
 
 		// verifies whether request path matches registered route path

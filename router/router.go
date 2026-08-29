@@ -119,7 +119,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	parts := splitPath(path)
 
 	// preallocated storedParams for storing parameters, dependent on how many r.URL parts are present on splitPath().
-	storedParams := make(map[string]string, len(parts))
+	var storedParams core.Params
 	var storedParamsErr error
 
 	for _, route := range s.DynamicRoutes[r.Method] { // loop over dynamic routes which are grouped by methods
@@ -140,15 +140,8 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if storedParams == nil {
-		Handler(w, &core.Request{
-			Request: r,
-			Params:  nil,
-		})
-	} else {
-		Handler(w, &core.Request{
-			Request: r,
-			Params:  storedParams,
-		})
-	}
+	Handler(w, &core.Request{
+		Request: r,
+		Params:  storedParams,
+	})
 }

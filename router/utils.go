@@ -1,9 +1,10 @@
 package router
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 	"strings"
+
 	"github.com/72sevenzy2/http-router/core"
 )
 
@@ -17,19 +18,20 @@ func splitPath(path string) []string {
 	return strings.Split(strings.Trim(path, "/"), "/")
 }
 
+var InvalidPathError = errors.New("route path and request paths dont match.")
+
 // func to match request parts and route parts
 func match(routeP []string, reqP []string) (core.Params, error) {
 
 	// verify if incoming requests path and if registered route match.
 	if len(routeP) != len(reqP) {
-		return nil, fmt.Errorf("route path and request path do not match: %d, %d", len(routeP), len(reqP))
+		return nil, InvalidPathError
 	}
 
 	// preallocated map to store params of size len(route.Parts).
 	// as number of params would vary on number of params in routeP, though it is safe to keep allocated size of len(routeP) for flexibility depending on number of parameters in a single route.
 	//params := make(map[string]string, len(routeP))
 
-	p := &core.Param{}
 	var params core.Params
 
 	for v := range routeP { // can use both reqP and routeP to loop over
@@ -37,20 +39,15 @@ func match(routeP []string, reqP []string) (core.Params, error) {
 		reqp := reqP[v]
 
 		if len(rp) > 0 && rp[0] == ':' { // validate whether route part contains an : (indicating that it is dynamic)
-			key := rp[1:]
-			p = &core.Param{
-				Key:   key,
-				Value: reqp,
-			}
 			//params[key] = reqp // store dynamic route indicator as param to reqp value.
-			params = append(params, p)
+			params = append(params, &core.Param{Key: rp[1:], Value: reqp})
 			continue // continue to next loop iteration
 		}
 
 		// verifies whether request path matches registered route path
 		// for RFC-3986 compliancy, it states that query, path components must be treated case-sensitive, so we dont normalise them here.
 		if rp != reqp {
-			return nil, fmt.Errorf("Request does not match Route path, found: %s", rp)
+			return nil, InvalidPathError
 		}
 	}
 

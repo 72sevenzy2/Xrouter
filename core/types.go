@@ -12,7 +12,6 @@ type Param struct {
 	Value string
 }
 type Params []*Param
-
 type Request struct { // shared
 	*http.Request
 	ContextReq *http.Request     // for timeout mw (WithContext() usage)

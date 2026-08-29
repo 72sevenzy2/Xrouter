@@ -8,7 +8,7 @@ import (
 	"github.com/72sevenzy2/http-router/router"
 )
 
-func BenchmarkDynamicRoutes(t *testing.B) {
+func BenchmarkXrouter(t *testing.B) {
 	t.ReportAllocs()
 	r := router.NewRouter()
 
@@ -26,7 +26,7 @@ func BenchmarkDynamicRoutes(t *testing.B) {
 }
 
 // comparing to go's stdlib mux
-func BenchmarkStdlibDynamic(t *testing.B) {
+func BenchmarkGolangStdlibRouter(t *testing.B) {
 	t.ReportAllocs()
 	r := http.NewServeMux()
 

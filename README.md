@@ -7,7 +7,9 @@
 - Ensures RFC-Compliancy over edge cases.
 - No external dependencies (excluding ones made for Xrouter).
 - Supports middleware aswell as route specific middleware handling.
-- Supports dynamic routes.
+- Route parameter compatibility.
+- Allocates 2+ times less than golangs standard mux router.
+
 
 Its also important to note that when handling dynamic routes, the route parameters are stored in a custom Request struct map field (params) in a map, to be retrieved from a particular field in that map via r.params, example:
 

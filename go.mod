@@ -3,6 +3,6 @@ module github.com/72sevenzy2/http-router
 go 1.25.5
 
 require (
-	github.com/72sevenzy2/Xrouter-middlewares v0.0.0-20260826133400-517ca0207c95
+	github.com/72sevenzy2/Xrouter-middlewares v0.0.0-20260830145418-5e4e65640e75
 	github.com/72sevenzy2/json-parser v0.0.0-20260722065308-0929b6a6cd79
 )

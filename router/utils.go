@@ -1,7 +1,6 @@
 package router
 
 import (
-	"errors"
 	"net/http"
 	"strings"
 
@@ -15,10 +14,32 @@ func isDynamic(path string) bool {
 
 // func to split route path
 func splitPath(path string) []string {
-	return strings.Split(strings.Trim(path, "/"), "/")
-}
+	// manual string indexing to avoid strings.genSplit overhead.
+	path = strings.Trim(path, "/") // normalise from any other outter slashes.
+	if path == "" {
+		return nil
+	}
 
-var InvalidPathError = errors.New("route path and request paths dont match.")
+	n := 1
+	for v := 0; v < len(path); v++ {
+		if path[v] == '/' {
+			n++
+		}
+	}
+
+	// preallocate according to n (number of parts in the request)
+	parts := make([]string, 0, n)
+	start := 0
+	for v := 0; v < len(path); v++{
+		if path[v] == '/' {
+			parts = append(parts, path[start:v])
+			start = v + 1 // update start position after each append
+		}
+	}
+
+	parts = append(parts, path[start:]) // ensures the last part URL (after final occurence of '/') is appended.
+	return parts
+}
 
 // func to match request parts and route parts
 func match(routeP []string, reqP []string) (core.Params, error) {

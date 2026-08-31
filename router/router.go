@@ -22,7 +22,7 @@ import (
 	"strings"
 
 	"github.com/72sevenzy2/http-router/core"
-	"github.com/72sevenzy2/json-parser/helpers"
+	"errors"
 	"github.com/72sevenzy2/json-parser/response"
 )
 
@@ -94,6 +94,8 @@ func (r *Router) Handle(method string, path string, handler HandlerFunc, mws ...
 	panic("path had been registered :" + path)
 }
 
+var InvalidPathError = errors.New("route path and request paths dont match.")
+
 // routing logic
 func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// making all routes normalised without a / at the end, but with root /.
@@ -111,7 +113,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Handler = handler
 		} else {
 			// otherwise return err if method is invalid
-			helpers.Failed(w)
+			response.JSON(w, http.StatusInternalServerError, nil, "invalid method")
 			return
 		}
 	}
@@ -126,7 +128,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		storedParams, storedParamsErr = match(route.Parts, parts)
 		if storedParamsErr != nil {
 			// request path does not match route path.
-			response.JSON(w, response.WithError(storedParamsErr.Error()), response.WithStatus(http.StatusBadRequest))
+			response.JSON(w, http.StatusBadRequest, nil, InvalidPathError.Error())
 			return
 		}
 		if storedParams == nil {
@@ -136,7 +138,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if Handler == nil {
-		response.JSON(w, response.WithStatus(http.StatusBadRequest), response.WithError(http.StatusText(http.StatusBadRequest)))
+		response.JSON(w, http.StatusBadRequest, nil, http.StatusText(http.StatusNotFound))
 		return
 	}
 

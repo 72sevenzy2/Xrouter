@@ -8,7 +8,7 @@ import (
 	"github.com/72sevenzy2/http-router/router"
 )
 
-func BenchmarkStaticRoutes(t *testing.B) {
+func BenchmarkXrouterStaticRoutes(t *testing.B) {
 	t.ReportAllocs()
 	r := router.NewRouter()
 
@@ -26,7 +26,7 @@ func BenchmarkStaticRoutes(t *testing.B) {
 	}
 }
 
-func BenchmarkStdlibStatic(t *testing.B) {
+func BenchmarkGolangStdlibStaticRoutes(t *testing.B) {
 	t.ReportAllocs()
 	r := http.NewServeMux()
 

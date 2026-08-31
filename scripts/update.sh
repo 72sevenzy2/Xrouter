@@ -2,18 +2,18 @@
 
 # for updating middlewares after each change.
 
-go get github.com/72sevenzy2/Xrouter-middlewares@latest
+run() {
+    "$@"
+    if [ $? -ne 0 ]; then
+        echo "failed: $*"
+        exit 1
+    fi
+}
 
-if [$? -ne 0]; then 
-	   echo "failed to update."
-	   exit 1
-fi
+run go get github.com/72sevenzy2/Xrouter-middlewares@latest
+run go mod tidy
+echo "successfully updated middlewares."
 
-go mod tidy
-
-if [$? -ne 0]; then 
-	   echo "go mod tidy failed."
-	   exit 1
-fi
-
-echo "successfully updated."
+run go get github.com/72sevenzy2/json-parser@latest
+run go mod tidy
+echo "successfully updated json-parser."

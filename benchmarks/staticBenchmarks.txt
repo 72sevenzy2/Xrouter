@@ -1,0 +1,26 @@
+goos: windows
+goarch: amd64
+pkg: github.com/72sevenzy2/http-router/benchmarks
+cpu: 11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz
+BenchmarkStaticRoutes-8   	 1383386	       915.0 ns/op	     470 B/op	       7 allocs/op
+BenchmarkStaticRoutes-8   	 1000000	      1682 ns/op	     410 B/op	       7 allocs/op
+BenchmarkStaticRoutes-8   	  476593	      2536 ns/op	     416 B/op	       7 allocs/op
+BenchmarkStaticRoutes-8   	  459277	      2530 ns/op	     422 B/op	       7 allocs/op
+BenchmarkStaticRoutes-8   	  469197	      2634 ns/op	     419 B/op	       7 allocs/op
+BenchmarkStaticRoutes-8   	  322248	      3345 ns/op	     380 B/op	       7 allocs/op
+BenchmarkStaticRoutes-8   	  371130	      3189 ns/op	     456 B/op	       7 allocs/op
+BenchmarkStaticRoutes-8   	  430466	      2701 ns/op	     431 B/op	       7 allocs/op
+BenchmarkStaticRoutes-8   	  475375	      2649 ns/op	     417 B/op	       7 allocs/op
+BenchmarkStaticRoutes-8   	  547659	      3205 ns/op	     398 B/op	       7 allocs/op
+BenchmarkStdlibStatic-8   	  517482	      2628 ns/op	     208 B/op	       8 allocs/op
+BenchmarkStdlibStatic-8   	  451232	      2665 ns/op	     218 B/op	       8 allocs/op
+BenchmarkStdlibStatic-8   	  474085	      2529 ns/op	     214 B/op	       8 allocs/op
+BenchmarkStdlibStatic-8   	  369210	      3339 ns/op	     189 B/op	       8 allocs/op
+BenchmarkStdlibStatic-8   	  345619	      3391 ns/op	     192 B/op	       8 allocs/op
+BenchmarkStdlibStatic-8   	  415017	      2507 ns/op	     184 B/op	       8 allocs/op
+BenchmarkStdlibStatic-8   	  468639	      2551 ns/op	     215 B/op	       8 allocs/op
+BenchmarkStdlibStatic-8   	  484377	      2489 ns/op	     213 B/op	       8 allocs/op
+BenchmarkStdlibStatic-8   	  491382	      2493 ns/op	     212 B/op	       8 allocs/op
+BenchmarkStdlibStatic-8   	  497143	      2595 ns/op	     211 B/op	       8 allocs/op
+PASS
+ok  	github.com/72sevenzy2/http-router/benchmarks	27.594s

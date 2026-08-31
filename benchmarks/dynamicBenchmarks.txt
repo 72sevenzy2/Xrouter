@@ -2,25 +2,25 @@ goos: windows
 goarch: amd64
 pkg: github.com/72sevenzy2/http-router/benchmarks
 cpu: 11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz
-BenchmarkXrouter-8              	 4252075	       266.0 ns/op	     136 B/op	       4 allocs/op
-BenchmarkXrouter-8              	 4922686	       602.1 ns/op	     136 B/op	       4 allocs/op
-BenchmarkXrouter-8              	 2667962	       509.7 ns/op	     136 B/op	       4 allocs/op
-BenchmarkXrouter-8              	 1768822	       674.8 ns/op	     136 B/op	       4 allocs/op
-BenchmarkXrouter-8              	 1593294	       724.4 ns/op	     136 B/op	       4 allocs/op
-BenchmarkXrouter-8              	 1802420	       657.7 ns/op	     136 B/op	       4 allocs/op
-BenchmarkXrouter-8              	 1854166	       651.9 ns/op	     136 B/op	       4 allocs/op
-BenchmarkXrouter-8              	 1755324	       681.7 ns/op	     136 B/op	       4 allocs/op
-BenchmarkXrouter-8              	 1773496	       688.3 ns/op	     136 B/op	       4 allocs/op
-BenchmarkXrouter-8              	 1791438	       664.1 ns/op	     136 B/op	       4 allocs/op
-BenchmarkGolangStdlibRouter-8   	  468771	      2673 ns/op	     231 B/op	       8 allocs/op
-BenchmarkGolangStdlibRouter-8   	  479677	      2581 ns/op	     230 B/op	       8 allocs/op
-BenchmarkGolangStdlibRouter-8   	  499675	      2587 ns/op	     227 B/op	       8 allocs/op
-BenchmarkGolangStdlibRouter-8   	  479202	      2615 ns/op	     230 B/op	       8 allocs/op
-BenchmarkGolangStdlibRouter-8   	  480728	      2712 ns/op	     229 B/op	       8 allocs/op
-BenchmarkGolangStdlibRouter-8   	  439972	      2696 ns/op	     198 B/op	       8 allocs/op
-BenchmarkGolangStdlibRouter-8   	  499472	      2690 ns/op	     227 B/op	       8 allocs/op
-BenchmarkGolangStdlibRouter-8   	  405668	      3341 ns/op	     201 B/op	       8 allocs/op
-BenchmarkGolangStdlibRouter-8   	  476833	      2797 ns/op	     230 B/op	       8 allocs/op
-BenchmarkGolangStdlibRouter-8   	  484515	      2534 ns/op	     229 B/op	       8 allocs/op
+BenchmarkXrouter-8              	 3813386	       302.1 ns/op	     136 B/op	       4 allocs/op
+BenchmarkXrouter-8              	 5745343	       419.4 ns/op	     136 B/op	       4 allocs/op
+BenchmarkXrouter-8              	 1696060	       718.6 ns/op	     136 B/op	       4 allocs/op
+BenchmarkXrouter-8              	 1694254	       730.4 ns/op	     136 B/op	       4 allocs/op
+BenchmarkXrouter-8              	 1645884	       721.1 ns/op	     136 B/op	       4 allocs/op
+BenchmarkXrouter-8              	 1572849	       748.0 ns/op	     136 B/op	       4 allocs/op
+BenchmarkXrouter-8              	 1531654	       760.5 ns/op	     136 B/op	       4 allocs/op
+BenchmarkXrouter-8              	 1621936	       729.9 ns/op	     136 B/op	       4 allocs/op
+BenchmarkXrouter-8              	 1598538	       756.0 ns/op	     136 B/op	       4 allocs/op
+BenchmarkXrouter-8              	 1620648	       736.9 ns/op	     136 B/op	       4 allocs/op
+BenchmarkGolangStdlibRouter-8   	  368810	      2869 ns/op	     205 B/op	       8 allocs/op
+BenchmarkGolangStdlibRouter-8   	  435318	      2589 ns/op	     198 B/op	       8 allocs/op
+BenchmarkGolangStdlibRouter-8   	  490682	      3161 ns/op	     228 B/op	       8 allocs/op
+BenchmarkGolangStdlibRouter-8   	  401806	      2906 ns/op	     201 B/op	       8 allocs/op
+BenchmarkGolangStdlibRouter-8   	  430984	      2672 ns/op	     199 B/op	       8 allocs/op
+BenchmarkGolangStdlibRouter-8   	  471564	      2665 ns/op	     231 B/op	       8 allocs/op
+BenchmarkGolangStdlibRouter-8   	  386487	      2632 ns/op	     203 B/op	       8 allocs/op
+BenchmarkGolangStdlibRouter-8   	  459271	      2601 ns/op	     233 B/op	       8 allocs/op
+BenchmarkGolangStdlibRouter-8   	  438950	      2695 ns/op	     198 B/op	       8 allocs/op
+BenchmarkGolangStdlibRouter-8   	  402620	      2721 ns/op	     201 B/op	       8 allocs/op
 PASS
-ok  	github.com/72sevenzy2/http-router/benchmarks	29.188s
+ok  	github.com/72sevenzy2/http-router/benchmarks	27.724s

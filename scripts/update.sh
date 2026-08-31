@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # for updating middlewares after each change.
 
 run() {
@@ -10,10 +9,10 @@ run() {
     fi
 }
 
-run go get github.com/72sevenzy2/Xrouter-middlewares@latest
+run go get -u github.com/72sevenzy2/Xrouter-middlewares@latest
 run go mod tidy
 echo "successfully updated middlewares."
 
-run go get github.com/72sevenzy2/json-parser@latest
+run go get -u github.com/72sevenzy2/json-parser@latest
 run go mod tidy
 echo "successfully updated json-parser."

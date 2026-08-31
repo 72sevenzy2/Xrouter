@@ -1,4 +1,6 @@
-github.com/72sevenzy2/Xrouter-middlewares v0.0.0-20260830145418-5e4e65640e75 h1:Ri4rmio3LUFERsQcxRfF4PmDloQ/eHfZnQMtErtk8Ak=
-github.com/72sevenzy2/Xrouter-middlewares v0.0.0-20260830145418-5e4e65640e75/go.mod h1:xCY9/gUDYpvdpgkDIdbdhDCKgBOZbMXuge7zGGDw+vM=
-github.com/72sevenzy2/json-parser v0.0.0-20260831131144-5225fcc281d0 h1:FMj0SSrnbwrjkPM8CCekidovz1Ej1tkevDxooRxCnxc=
-github.com/72sevenzy2/json-parser v0.0.0-20260831131144-5225fcc281d0/go.mod h1:wA/oKrssLUp44rupBrh/cRqQdl3qcLEoES5jK7+VpVg=
+github.com/72sevenzy2/Xrouter-middlewares v0.0.0-20260831141952-d974f26ee53f h1:AUqk+w9OQmJrC+FVM1QjDP+2dYdmQ9xDPy78yXkZukY=
+github.com/72sevenzy2/Xrouter-middlewares v0.0.0-20260831141952-d974f26ee53f/go.mod h1:Oz2a7dDI0pgtTy5jgqtRyiQM0r3BmaRO6q+mWyUEIeo=
+github.com/72sevenzy2/json-parser v0.0.0-20260831135417-12f506734678 h1:KhwJEA4LV5CIRY+2HaC6xdsdFH7A7Fo1fgvS4CDrsms=
+github.com/72sevenzy2/json-parser v0.0.0-20260831135417-12f506734678/go.mod h1:wA/oKrssLUp44rupBrh/cRqQdl3qcLEoES5jK7+VpVg=
+github.com/72sevenzy2/json-parser v0.0.0-20260831142858-520fcf6f33e3 h1:0EySVhIdgSYx+CkZivE/B+dWcF9IU8Mi5Hd7I6nIDj0=
+github.com/72sevenzy2/json-parser v0.0.0-20260831142858-520fcf6f33e3/go.mod h1:wA/oKrssLUp44rupBrh/cRqQdl3qcLEoES5jK7+VpVg=

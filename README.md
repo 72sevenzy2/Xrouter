@@ -8,7 +8,7 @@
 - No external dependencies (excluding ones made for Xrouter).
 - Supports middleware aswell as route specific middleware handling.
 - Route parameter compatibility.
-- Allocates 2+ times less than golangs standard mux router.
+- Allocates 2+ times less than golangs standard router.
 
 
 Its also important to note that when handling dynamic routes, the route parameters are stored in a custom Request struct map field (params) in a map, to be retrieved from a particular field in that map via r.params, example:

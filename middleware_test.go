@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +10,34 @@ import (
 
 	"github.com/72sevenzy2/http-router/router"
 )
+
+func TestCancelFunc(t *testing.T) {
+	b := router.NewRouter()
+
+	mw, cancel := router.Canceller()
+	b.Use(mw)
+
+	b.Get("/foo", func(w http.ResponseWriter, r *router.Request) {
+		select {
+		case <-r.Context().Done():
+			w.WriteHeader(http.StatusOK)
+		default:
+			w.WriteHeader(http.StatusFailedDependency)
+		}
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/foo", nil)
+	rr := httptest.NewRecorder()
+
+	cancel()
+	b.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("failed: status %d:", rr.Code)
+	}
+
+	t.Log("successful")
+}
 
 // auth testing
 func TestBasicAuth(t *testing.T) {
@@ -37,7 +64,7 @@ func TestBasicAuth(t *testing.T) {
 	if rr.Code != http.StatusOK {
 		t.Fatalf("failed with status %d", rr.Code)
 	}
-	fmt.Println("successful.")
+	t.Log("successful.")
 }
 
 func TestBearerAuth(t *testing.T) {
@@ -61,7 +88,7 @@ func TestBearerAuth(t *testing.T) {
 	if rr.Code != http.StatusOK {
 		t.Fatalf("failed auth with status %d", rr.Code)
 	}
-	fmt.Println("successful.")
+	t.Log("successful.")
 }
 
 // test func to check if logger mw calls next middleware:
@@ -81,7 +108,7 @@ func TestLoggerNext(t *testing.T) {
 	handler(rr, routerReq)
 
 	if !called {
-		fmt.Println("logger did not call next().")
+		t.Log("logger did not call next().")
 	}
 
 	if rr.Code != http.StatusOK {

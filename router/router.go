@@ -142,6 +142,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	Handler = s.ApplyMiddlewares(Handler) // apply middlewares.
 	Handler(w, &core.Request{
 		Request: r,
 		Params:  storedParams,

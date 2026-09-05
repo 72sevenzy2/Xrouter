@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"slices"
 	"time"
 
@@ -32,6 +33,10 @@ func BasicAuth(user, pass string) core.Middleware {
 
 func BearerAuth(token string) core.Middleware {
 	return mw.BearerAuth(token)
+}
+
+func Canceller() (core.Middleware, context.CancelFunc) {
+	return mw.Canceller()
 }
 
 func Recoverer() core.Middleware {
